@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Démonstrateur CRC Assurance Vie — Aujourd’hui vs à l’ère de l’IA agentique</title>
+<style>
+:root{
+  --bg:#E8ECF3; --panel:#FFFFFF; --ink:#1B2232; --ink2:#465166; --muted:#7A8499;
+  --line:#D6DCE7; --line2:#E6EAF1; --chrome:#F2F4F8; --chrome2:#E6EAF1;
+  --slate:#3D5A80; --slate-soft:#E4EBF5; --slate-ink:#2C4466;
+  --ai:#5A3FD0; --ai-soft:#EFEBFF; --ai-ink:#3A2696; --ai-line:#D3CAFA;
+  --ok:#1C9A57; --ok-soft:#E2F4EA; --ok-ink:#11683A;
+  --warn:#D98A04; --warn-soft:#FFF2D9; --warn-ink:#7A4D00;
+  --ko:#D13F38; --ko-soft:#FDE7E6; --ko-ink:#8E1C16;
+  --surf1:#FAFBFD; --surf2:#F5F7FB; --wsbg:#EDF0F5; --winfront:#E1E8F2; --aisurf:#FAF9FF; --target:#FFFAEB; --warnsurf:#FFFBF1;
+  --line3:#C9D1DE; --line4:#9AA6B9; --warn-line:#F0D49B; --ko-line:#F0B3AF; --ai-strong:#3A2696;
+  --scA:#1C9A57; --scA-soft:#E3F4EA; --scA-ink:#11683A; --scB:#D98A04; --scB-soft:#FFF1D6; --scB-ink:#7A4D00; --scC:#D13F38; --scC-soft:#FDE5E4; --scC-ink:#8E1C16;
+  --font:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Roboto,Arial,sans-serif;
+  --hand:"Segoe Print","Bradley Hand","Comic Sans MS","Chalkboard SE","Marker Felt",cursive;
+  --serif:Georgia,"Times New Roman",serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#CFD6E2}
+body{font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+button{font-family:inherit;color:inherit}
+[hidden]{display:none !important}
+.ic{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:middle}
+.ic.fill{fill:currentColor;stroke:none}
+.muted{color:var(--muted)}
+
+#viewport{position:fixed;inset:0;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform:translate(-50%,-50%);transform-origin:50% 50%;
+  background:var(--bg);display:flex;flex-direction:column;gap:9px;padding:11px 14px 13px;box-shadow:0 10px 40px rgba(16,24,40,.18)}
+
+/* ---------- Barre du haut ---------- */
+#topbar{height:46px;flex:none;display:flex;align-items:center;gap:8px}
+.brand{flex:1;min-width:0;display:flex;align-items:center;gap:11px}
+.brand-mark{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#1B2232,#5A3FD0);color:#fff;display:grid;place-items:center;flex:none}
+.brand-mark .ic{width:20px;height:20px}
+.brand-title{font-size:17px;font-weight:700;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-sub{font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.grp{display:flex;align-items:center;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:3px;flex:none}
+.grp-lbl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:0 5px 0 7px}
+.seg{border:0;background:transparent;padding:7px 10px;border-radius:8px;font-size:12.5px;font-weight:600;color:var(--ink2);cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.seg:hover{background:var(--chrome)}
+.seg.on{background:var(--ink);color:#fff}
+.seg .sl{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;background:var(--chrome2);color:var(--ink);font-size:11px;font-weight:800}
+.seg.on .sl{background:var(--panel);color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 12px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:#B6C0D2}
+.btn.primary{background:var(--ai);border-color:var(--ai);color:#fff;min-width:150px;justify-content:center}
+.btn.primary:hover{background:#4A31B8}
+.btn[disabled]{opacity:.42;cursor:not-allowed}
+.btn.sm{padding:5px 9px;font-size:12px;border-radius:7px}
+.btn.sm.primary{min-width:0}
+.btn.on{background:var(--warn-soft);border-color:#EBC77F}
+.kbd-hint{font-size:10.5px;color:var(--muted);text-align:right;line-height:1.3;flex:none}
+
+/* ---------- Compteurs ---------- */
+#counters{flex:none;height:80px;display:grid;grid-template-columns:184px repeat(4,minmax(0,.86fr)) minmax(0,1.3fr) minmax(0,1.25fr) minmax(0,1.32fr);gap:6px;padding:6px 7px;background:#D3DBE8;border:1.5px dashed #8E9CB3;border-radius:14px}
+.c-legend{display:flex;flex-direction:column;justify-content:center;gap:5px;padding:0 4px 0 2px}
+.cnt-title{display:inline-flex;align-items:center;gap:6px;width:max-content;background:#1B2232;color:#fff;font-size:10.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px 3px 7px;border-radius:6px;margin-bottom:1px}
+.cnt-title .ic{width:13px;height:13px}
+.cnt-title small{font-size:9.5px;font-weight:600;letter-spacing:.03em;text-transform:none;opacity:.75}
+.lg{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:700;white-space:nowrap;color:var(--ink2)}
+.sw{width:12px;height:12px;border-radius:3px;flex:none}
+.sw.l{background:var(--slate)} .sw.r{background:var(--ai)}
+.tile{background:var(--panel);border:1px solid #C3CCDB;border-radius:10px;padding:5px 10px;display:flex;flex-direction:column;gap:1px;min-width:0;justify-content:center}
+.t-lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:1px}
+.t-row{display:flex;align-items:center;gap:8px;height:22px}
+.t-v{font-size:19px;font-weight:800;min-width:30px;font-variant-numeric:tabular-nums;line-height:1;display:inline-block}
+.t-row.l .t-v{color:var(--slate)} .t-row.r .t-v{color:var(--ai)}
+.t-bar{flex:1;height:8px;border-radius:4px;background:var(--line2);overflow:hidden}
+.t-bar>i{display:block;height:100%;width:0;border-radius:4px;transition:width .35s ease}
+.t-row.l .t-bar>i{background:var(--slate)} .t-row.r .t-bar>i{background:var(--ai)}
+.t-note{flex:1;font-size:11.5px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.t-note.alert{color:var(--ko);font-weight:700}
+.t-note.warn{color:var(--warn-ink);font-weight:700}
+.pop{animation:pop .38s ease}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.28)}100%{transform:scale(1)}}
+.tile.time{border-style:dashed;border-color:#9FB0C8}
+.t-v.tm{font-size:14px;min-width:96px;white-space:nowrap}
+.t-v.tm.pop{animation:popS .38s ease}
+@keyframes popS{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+.t-time{font-size:14px;font-weight:700;color:var(--ink2);line-height:1.25}
+
+/* ---------- Consoles ---------- */
+#consoles{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr);gap:0 28px;position:relative}
+.c-banner{height:40px;display:flex;align-items:center;gap:10px;padding:0 16px;border-radius:14px 14px 0 0;color:#fff;min-width:0}
+.c-banner.l{background:var(--slate)}
+.c-banner.r{background:linear-gradient(90deg,#5A3FD0,#3A2696)}
+.c-banner .ic{width:18px;height:18px}
+.cb-title{font-size:16px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.cb-sub{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;white-space:nowrap;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:7px;padding:3px 9px}
+.cb-sub .ic{width:14px;height:14px}
+.console{background:var(--panel);border:1px solid var(--line);border-top:0;border-radius:0 0 14px 14px;display:flex;flex-direction:column;min-height:0;min-width:0;overflow:hidden;position:relative}
+.c-head{height:62px;flex:none;display:flex;align-items:center;gap:12px;padding:0 10px;border-bottom:1px solid var(--line2);background:var(--surf1)}
+.c-cap{flex:1;min-width:0;display:flex;align-items:center;gap:10px;height:52px;padding:0 12px;border:2px solid var(--ko);border-radius:10px;background:#FFF7F6;position:relative}
+.c-cap.attn{animation:capAttn .95s ease-out 3}
+.c-cap.attn .cap-text{animation:capIn .35s ease, capInk 2.85s ease}
+@keyframes capAttn{0%{box-shadow:0 0 0 0 rgba(209,63,56,.55);background:#FFE1DE}55%{box-shadow:0 0 0 5px rgba(209,63,56,.16);background:#FFF0EE}100%{box-shadow:0 0 0 0 rgba(209,63,56,0);background:#FFF7F6}}
+@keyframes capInk{0%,60%{color:#7E1A15}100%{color:var(--ink)}}
+.console[data-side=R] .c-cap{border-color:var(--ok);background:#F3FBF6}
+.console[data-side=R] .c-cap.attn{animation-name:capAttnG}
+.console[data-side=R] .c-cap.attn .cap-text{animation:capIn .35s ease, capInkG 2.85s ease}
+@keyframes capAttnG{0%{box-shadow:0 0 0 0 rgba(28,154,87,.55);background:#D9F2E3}55%{box-shadow:0 0 0 5px rgba(28,154,87,.16);background:#EAF8EF}100%{box-shadow:0 0 0 0 rgba(28,154,87,0);background:#F3FBF6}}
+@keyframes capInkG{0%,60%{color:#0E5A31}100%{color:var(--ink)}}
+/* Frise */
+.frise{flex:none;height:58px;display:flex;align-items:center;gap:6px;padding:3px 10px 3px 12px;border-bottom:1px solid var(--line2);background:linear-gradient(var(--surf1),var(--surf2))}
+.fr-h{width:80px;flex:none;font-size:9.5px;line-height:1.3;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.fr-h b{display:block;color:var(--ink2);font-weight:800}
+.console[data-side=R] .fr-h b{color:var(--ai-ink)}
+.fr-track{flex:1;display:flex;align-items:flex-start;min-width:0}
+.fr-node{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative;min-width:0}
+.fr-node::before{content:"";position:absolute;top:11px;left:-50%;right:50%;height:2px;background:var(--line3);z-index:0}
+.fr-node:first-child::before{display:none}
+.fr-dot{width:24px;height:24px;border-radius:50%;border:2px solid var(--line3);background:var(--panel);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--muted);position:relative;z-index:1;transition:all .25s}
+.fr-dot .ic{width:13px;height:13px}
+.fr-lbl{font-size:10.5px;line-height:1.15;color:var(--ink2);text-align:center;max-width:100%;padding:0 2px;font-weight:600}
+.fr-lbl .al{display:block;color:var(--ko-ink);font-weight:800;white-space:nowrap}
+.fr-lbl .al.w{color:var(--warn-ink)}
+.fr-node.done .fr-dot{background:var(--slate);border-color:var(--slate);color:#fff}
+.fr-node.done::before{background:var(--slate)}
+.fr-node.cur .fr-dot{border-color:var(--slate);color:var(--slate);animation:pulse 1.4s ease infinite}
+.fr-node.ai .fr-dot{border-color:var(--ai-line);color:var(--ai)}
+.fr-node.ai .fr-lbl{color:var(--ai-ink)}
+.fr-node.ai.done .fr-dot{background:var(--ai);border-color:var(--ai);color:#fff}
+.console[data-side=R] .fr-node.done::before{background:var(--ai)}
+.console[data-side=R] .fr-node.done:not(.ai) .fr-dot{background:var(--ai-strong);border-color:var(--ai-strong)}
+.console[data-side=R] .fr-node.cur .fr-dot{border-color:var(--ai);color:var(--ai);animation:pulseR 1.4s ease infinite}
+.fr-node.skip .fr-dot{border-style:dashed;opacity:.45}
+.fr-node.skip .fr-lbl{opacity:.45;text-decoration:line-through}
+.fr-node.alert .fr-dot{background:var(--ko) !important;border-color:var(--ko) !important;color:#fff}
+.fr-node.warn .fr-dot{background:var(--warn) !important;border-color:var(--warn) !important;color:#fff}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 3px rgba(61,90,128,.2)}50%{box-shadow:0 0 0 7px rgba(61,90,128,.06)}}
+@keyframes pulseR{0%,100%{box-shadow:0 0 0 3px rgba(90,63,208,.22)}50%{box-shadow:0 0 0 7px rgba(90,63,208,.06)}}
+
+/* Légende d'étape */
+.cap-step{flex:none;font-size:11.5px;font-weight:800;padding:5px 9px;border-radius:6px;background:var(--slate-soft);color:var(--slate-ink);white-space:nowrap}
+.console[data-side=R] .cap-step{background:var(--ai-soft);color:var(--ai-ink)}
+.cap-text{font-size:13px;line-height:1.28;color:var(--ink);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cap-text.flash-in{animation:capIn .35s ease}
+@keyframes capIn{from{opacity:.2;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+/* Espace de travail */
+.ws{flex:1;min-height:0;display:flex;flex-direction:column;position:relative;background:var(--wsbg)}
+.apps{flex:none;height:34px;display:flex;align-items:center;gap:6px;padding:0 10px;border-bottom:1px solid var(--line);background:var(--surf1);overflow:hidden}
+.apps-lbl{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:2px;white-space:nowrap}
+.app{display:inline-flex;align-items:center;gap:6px;height:25px;padding:0 10px;border:1px solid var(--line);border-radius:7px;background:var(--panel);font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer;white-space:nowrap;transition:all .2s}
+.app:hover{border-color:#B5C0D3}
+.app.on{border-color:#9FB2CD;color:var(--slate-ink);background:var(--slate-soft)}
+.app.ai{cursor:default;opacity:.55}
+.app.ai.ok{opacity:1;border-color:var(--ai-line);background:var(--ai-soft);color:var(--ai-ink)}
+.app .okmark{display:none;color:var(--ai)}
+.app.ai.ok .okmark{display:inline-flex}
+.desk{flex:1;min-height:0;position:relative;overflow:hidden}
+.taskbar{flex:none;height:30px;display:flex;align-items:center;gap:6px;padding:0 10px;border-top:1px solid var(--line);background:var(--surf1);overflow:hidden}
+.tb-lbl{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.task{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 8px;border-radius:6px;font-size:11.5px;font-weight:600;color:var(--ink2);background:var(--panel);border:1px solid var(--line);cursor:pointer;white-space:nowrap;animation:taskIn .25s ease}
+.task .ic{width:13px;height:13px}
+.task.on{background:var(--slate-soft);border-color:#AFC0D8;color:var(--slate-ink)}
+.console[data-side=R] .task.on{background:var(--ai-soft);border-color:var(--ai-line);color:var(--ai-ink)}
+.tb-count{margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap}
+@keyframes taskIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* Corbeille */
+.inbox{position:absolute;inset:10px;display:flex;flex-direction:column;gap:10px}
+.ib-card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;flex:none}
+.ib-h{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--line2);font-size:13px;font-weight:700}
+.ib-h .cnt{font-size:11px;background:var(--chrome2);border-radius:10px;padding:2px 8px;color:var(--ink2)}
+.ib-h .sort{margin-left:auto;font-size:11px;color:var(--muted);font-weight:600}
+.ib-table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.ib-table th{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;font-weight:700;padding:6px 9px;background:var(--surf1);border-bottom:1px solid var(--line2)}
+.ib-table td{padding:7px 8px;border-bottom:1px solid var(--line2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib-table tr:last-child td{border-bottom:0}
+.ib-row{cursor:pointer}
+.ib-row:hover td{background:var(--surf2)}
+.ib-row.target td{background:var(--target)}
+.ib-row.target td:nth-child(3){font-weight:700}
+.ib-row.target td:first-child{box-shadow:inset 3px 0 0 var(--warn)}
+.ib-row.target.pulse td{animation:rowPulse 1.6s ease 2}
+.ib-row.opened td{background:var(--surf2);font-weight:500}
+.ib-row.opened td:first-child{box-shadow:inset 3px 0 0 var(--slate)}
+@keyframes rowPulse{50%{background:#FFE9B0}}
+.chan{display:inline-flex;align-items:center;gap:5px;color:var(--ink2);font-weight:500;font-size:11.5px}
+.chan .ic{width:14px;height:14px;color:var(--muted)}
+.ib-row.target .chan .ic{color:var(--warn-ink)}
+.st{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--chrome2);color:var(--ink2);white-space:nowrap}
+.st.new{background:#FFF0CC;color:var(--warn-ink)}
+.st.ai{background:var(--ai-soft);color:var(--ai-ink);border:1px solid var(--ai-line)}
+.st.ai .ic{width:12px;height:12px}
+.st.prep{background:var(--panel);color:var(--ai-ink);border:1px dashed var(--ai-line)}
+.st.done{background:var(--ok-soft);color:var(--ok-ink)}
+.st.wait{background:var(--chrome2);color:var(--ink2)}
+.spin{width:10px;height:10px;border-radius:50%;border:2px solid var(--ai-line);border-top-color:var(--ai);animation:spin .8s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ib-act{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:12px}
+.ib-act h5{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:flex;align-items:center;gap:6px}
+.ib-act.ai h5{color:var(--ai-ink)}
+.ib-act p{margin:0;color:var(--ink2);line-height:1.45}
+.prep-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px}
+.prep-list li{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:12px}
+.prep-list li .pk{width:16px;height:16px;border-radius:50%;border:1.5px solid var(--line3);display:grid;place-items:center;flex:none}
+.prep-list li .pk .ic{width:10px;height:10px;opacity:0}
+.prep-list li.run{color:var(--ai-ink);font-weight:600}
+.prep-list li.run .pk{border-color:var(--ai);border-top-color:transparent;animation:spin .8s linear infinite}
+.prep-list li.ok{color:var(--ink)}
+.prep-list li.ok .pk{background:var(--ai);border-color:var(--ai);color:#fff}
+.prep-list li.ok .pk .ic{opacity:1}
+.prep-list li.ko .pk{background:var(--ko);border-color:var(--ko);color:#fff}
+.prep-list li.ko .pk .ic{opacity:1}
+.todo-list{margin:6px 0 0;padding-left:18px;color:var(--ink2);line-height:1.5;columns:2;column-gap:18px}
+
+/* Fenêtres */
+.win{position:absolute;background:var(--panel);border:1px solid var(--line3);border-radius:9px;box-shadow:0 5px 16px rgba(20,32,56,.12);display:flex;flex-direction:column;overflow:hidden;animation:winIn .22s ease}
+.win.front{box-shadow:0 16px 36px rgba(20,32,56,.25);border-color:#93A6C3}
+@keyframes winIn{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+.win-t{flex:none;height:32px;display:flex;align-items:center;gap:8px;padding:0 5px 0 11px;background:var(--chrome);border-bottom:1px solid var(--line);font-size:12.5px;font-weight:700;color:var(--ink2);white-space:nowrap;overflow:hidden}
+.win.front .win-t{background:var(--winfront);color:var(--ink)}
+.console[data-side=R] .win.front .win-t{background:var(--ai-soft)}
+.win-t .sub{font-weight:500;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.win-x{margin-left:auto;border:0;background:transparent;width:26px;height:24px;border-radius:5px;color:var(--muted);cursor:pointer;display:grid;place-items:center;flex:none}
+.win-x:hover{background:var(--line3)}
+.win-b{flex:1;min-height:0;overflow:auto;padding:12px 14px;font-size:12.5px;position:relative}
+.win-b::-webkit-scrollbar,.f-scroll::-webkit-scrollbar{width:9px}
+.win-b::-webkit-scrollbar-thumb,.f-scroll::-webkit-scrollbar-thumb{background:var(--line3);border-radius:6px}
+
+/* Message */
+.meta{display:grid;grid-template-columns:104px 1fr;gap:5px 10px;font-size:12px;margin-bottom:10px;align-items:center}
+.meta .k{color:var(--muted);font-weight:600}
+.chip-chan{display:inline-flex;align-items:center;gap:5px;font-weight:700;font-size:11.5px;color:var(--warn-ink);background:var(--warn-soft);border:1px solid var(--warn-line);border-radius:6px;padding:2px 8px;width:max-content}
+.chip-chan .ic{width:13px;height:13px}
+.msg-text{background:var(--surf2);border:1px solid var(--line2);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.55}
+.pj-line{display:flex;align-items:center;gap:8px;margin-top:10px;padding:8px 10px;border:1px dashed var(--line3);border-radius:8px;font-size:12px}
+.pj-line b{font-weight:600}
+.lnk{border:0;background:none;color:#2453B3;font-weight:700;cursor:pointer;padding:0;font-size:12px;text-decoration:underline;margin-left:auto}
+.msg-actions{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.compose{margin-top:10px;border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--surf1);display:flex;flex-direction:column;gap:8px}
+.compose h6{margin:0;font-size:12px;display:flex;align-items:center;gap:6px}
+.sent{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ok-ink);background:var(--ok-soft);border-radius:6px;padding:4px 8px;width:max-content}
+
+/* Champs */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px 12px}
+.fld{display:flex;flex-direction:column;gap:3px;min-width:0}
+.fld.full{grid-column:1 / -1}
+.fld label{font-size:11px;font-weight:700;color:var(--ink2)}
+.inp{white-space:normal;color:var(--ink);min-height:29px;border:1px solid var(--line3);border-radius:6px;background:var(--panel);padding:5px 8px;font-size:12.5px;cursor:text;display:flex;align-items:center;gap:6px;transition:border-color .2s,box-shadow .2s;text-align:left;width:100%}
+.inp .ph{color:#A6AFBF}
+.inp.filled{border-color:#94A9C8;background:var(--surf1);cursor:default}
+.inp.typing{border-color:var(--slate);box-shadow:0 0 0 3px rgba(61,90,128,.16)}
+.inp.na{background:var(--surf2);color:var(--muted);border-style:dashed}
+.inp.area{min-height:58px;align-items:flex-start;line-height:1.45}
+.inp .caret{width:1px;height:14px;background:var(--ink);animation:blink 1s step-end infinite}
+@keyframes blink{50%{opacity:0}}
+.form-note{font-size:11.5px;color:var(--ink2);margin-top:8px}
+.form-err{font-size:12px;color:var(--ko-ink);background:var(--ko-soft);border-radius:6px;padding:6px 9px;margin-top:8px}
+.form-ok{font-size:12px;color:var(--ok-ink);background:var(--ok-soft);border-radius:6px;padding:6px 9px;margin-top:8px;font-weight:700;display:flex;gap:6px;align-items:center}
+.form-actions{display:flex;gap:6px;margin-top:12px}
+.act-bar{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--muted);margin-bottom:10px}
+.act-bar .pill{font-weight:700;color:var(--ink2);background:var(--chrome2);border-radius:5px;padding:2px 7px}
+.dlg{position:absolute;inset:0;background:rgba(27,34,50,.28);display:grid;place-items:center;z-index:5}
+.dlg-box{background:var(--panel);border-radius:10px;padding:14px 16px;width:330px;box-shadow:0 12px 30px rgba(0,0,0,.25);font-size:12.5px}
+.dlg-box h6{margin:0 0 6px;font-size:13px}
+
+/* Visionneuse */
+.viewer-bar{display:flex;align-items:center;gap:6px;margin:-4px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line2)}
+.vbtn{border:1px solid var(--line);background:var(--panel);border-radius:6px;height:26px;min-width:28px;display:grid;place-items:center;cursor:pointer;color:var(--ink2)}
+.vbtn:hover{border-color:#B5C0D3}
+.zoomv{font-size:11.5px;color:var(--ink2);min-width:42px;text-align:center;font-weight:600}
+.viewer-area{background:#5F6673;border-radius:8px;padding:16px;overflow:hidden;min-height:300px}
+.scan-wrap{transform-origin:top left;transition:transform .3s ease}
+
+/* Formulaire scanné */
+.scan{width:540px;background-color:#FBFAF3;background-image:repeating-linear-gradient(0deg,rgba(70,60,30,.028) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(70,60,30,.018) 0 1px,transparent 1px 4px);
+  border:1px solid #D9D4C3;box-shadow:0 3px 12px rgba(0,0,0,.25),inset 0 0 50px rgba(120,105,70,.12);padding:20px 24px 18px;color:#262626;font-family:var(--serif);transform:rotate(-.7deg);position:relative}
+.scan::after{content:"";position:absolute;right:26px;top:16px;width:70px;height:70px;border-radius:50%;border:2px solid rgba(160,40,40,.25);transform:rotate(-14deg)}
+.scan-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #2B2B2B;padding-bottom:7px;margin-bottom:8px}
+.scan-logo{font:700 10px/1.25 var(--font);letter-spacing:.14em;color:#555}
+.scan-title{font-size:17px;font-weight:700;letter-spacing:.05em}
+.scan-sub{font-size:11px;color:#555}
+.scan-row{display:flex;align-items:flex-end;flex-wrap:wrap;gap:4px 6px;font-size:12.5px;padding:4px 5px;border-radius:4px;transition:background .3s}
+.scan-lbl{color:#2E2E2E;white-space:nowrap}
+.line{flex:1;border-bottom:1px dotted #777;min-width:70px;padding:0 3px 1px;min-height:19px}
+.line.sm{flex:0 0 120px}
+.hand{font-family:var(--hand);color:#1C3A8F;font-size:15.5px;line-height:1.05;letter-spacing:.01em}
+.hand.big{font-size:17px}
+.scan-sec{font:700 11px var(--font);text-transform:uppercase;letter-spacing:.06em;color:#333;margin:9px 0 1px 5px}
+.cbox{display:inline-grid;place-items:center;width:15px;height:15px;border:1.5px solid #333;font-family:var(--hand);color:#1C3A8F;font-size:15px;line-height:1;flex:none}
+.sig{font-family:var(--hand);font-size:23px;color:#1C3A8F;transform:rotate(-7deg);display:inline-block;padding:0 8px}
+.sig-note{font-family:var(--hand);color:#1C3A8F;font-size:13px}
+.scan-foot{font:10px var(--font);color:#777;margin-top:8px;border-top:1px solid #CFCBBE;padding-top:5px}
+
+/* Outil Contrat */
+.search-bar{display:flex;align-items:flex-end;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--line2)}
+.search-bar .fld{width:200px}
+.ct-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ct-box{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.ct-box.wide{grid-column:1 / -1}
+.ct-box h5{margin:0 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.dl{display:grid;grid-template-columns:118px 1fr;gap:3px 8px;font-size:12px}
+.dl dt{color:var(--ink2)} .dl dd{margin:0;font-weight:600}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{font-size:10.5px;text-transform:uppercase;color:var(--muted);text-align:left;padding:4px 6px;border-bottom:1px solid var(--line2);font-weight:700}
+.tbl td{padding:4px 6px;border-bottom:1px solid var(--line2)}
+.tbl td.r,.tbl th.r{text-align:right;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:1px 7px;background:var(--chrome2);color:var(--ink2)}
+.pill.open{background:var(--ok-soft);color:#1D6B43}
+.pill.closed{background:var(--surf2);color:#6A7385}
+.empty-state{color:var(--muted);font-size:12px;padding:30px 0;text-align:center}
+
+/* Catalogue */
+.cat-rules{background:var(--surf2);border:1px solid var(--line2);border-radius:8px;padding:8px 10px;font-size:12px;margin-bottom:10px;line-height:1.5}
+.cat-row{cursor:pointer}
+.cat-row:hover td{background:var(--surf2)}
+.cat-row td:last-child{color:var(--muted);text-align:right}
+.cat-det td{background:var(--surf1);font-size:11.5px;color:var(--ink2);line-height:1.5}
+.dic{margin-top:6px;border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--panel);display:flex;gap:8px;align-items:center}
+.dic .ic{color:#B23A3A}
+
+/* Check-list */
+.chk-list{display:flex;flex-direction:column;gap:6px}
+.chk-item{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;cursor:pointer;background:var(--panel);text-align:left;font-size:12.5px;width:100%}
+.chk-item:hover{border-color:#B5C0D3}
+.chk-box{width:18px;height:18px;border-radius:4px;border:2px solid var(--line4);display:grid;place-items:center;flex:none;color:#fff}
+.chk-box .ic{width:12px;height:12px;opacity:0;stroke-width:3}
+.chk-item.on .chk-box{background:var(--slate);border-color:var(--slate)}
+.chk-item.on .chk-box .ic{opacity:1}
+.chk-prog{font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px}
+
+/* Fiche de décision */
+.fiche{position:absolute;inset:6px;background:var(--panel);border:1px solid var(--line3);border-radius:9px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 14px 34px rgba(20,32,56,.2);animation:winIn .25s ease;z-index:20}
+.f-main{flex:1;min-height:0;position:relative;display:flex;flex-direction:column}
+.blk{position:relative;border-radius:8px}
+.f-scroll{flex:1;min-height:0;overflow:auto;padding:10px 12px;position:relative}
+.f-head{display:flex;align-items:center;gap:8px;margin-bottom:9px;flex-wrap:wrap}
+.badge-ai{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;color:var(--ai-ink);background:var(--ai-soft);border:1px solid var(--ai-line);border-radius:6px;padding:3px 8px}
+.badge-ai .ic{width:13px;height:13px}
+.f-status{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;border-radius:6px;padding:3px 8px}
+.f-status .ic{width:13px;height:13px}
+.f-status.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.f-status.warn{background:var(--warn-soft);color:var(--warn-ink)}
+.f-status.ko{background:var(--ko-soft);color:var(--ko-ink)}
+.f-ref{margin-left:auto;font-size:12px;color:var(--ink2);font-weight:600}
+.f-cols{display:grid;grid-template-columns:316px minmax(0,1fr);gap:10px;align-items:start}
+.f-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+.f-cols>.f-col:first-child{position:sticky;top:0;z-index:2}
+.f-sec{border:1px solid var(--line);border-radius:10px;padding:9px 10px;background:var(--panel);position:relative;transition:box-shadow .25s}
+.f-sec h4{margin:0 0 7px;font-size:12.5px;display:flex;align-items:center;gap:7px}
+.f-sub{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 5px;display:flex;align-items:center;gap:6px}
+.num{width:19px;height:19px;border-radius:50%;background:var(--ai);color:#fff;font-size:11px;display:grid;place-items:center;font-weight:800;flex:none}
+.f-chan{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2);margin-bottom:6px;flex-wrap:wrap}
+.f-msg{font-size:12.3px;line-height:1.55;background:var(--surf2);border-radius:7px;padding:7px 9px}
+mark.x{background:rgba(90,63,208,.12);color:inherit;border-bottom:2px solid rgba(90,63,208,.55);border-radius:3px;padding:0 1px;cursor:pointer}
+.f-pj{margin-top:8px}
+.f-pj-h{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;margin-bottom:5px}
+.f-pj-h span{margin-left:auto;font-size:10.5px;color:var(--ai-ink);font-weight:600;white-space:nowrap}
+.f-pj-view{width:100%;height:178px;overflow:hidden;border-radius:6px;background:#5F6673;padding:6px;position:relative}
+.f-pj-view .scan{transform:scale(.45) rotate(-.7deg);transform-origin:top left;position:absolute;left:8px;top:6px}
+.scan-row.xk{background:rgba(90,63,208,.12);box-shadow:inset 0 0 0 1.5px rgba(90,63,208,.45);cursor:pointer}
+.xchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.xchip{display:inline-flex;flex-wrap:wrap;align-items:baseline;gap:1px 5px;border:1px solid var(--ai-line);background:var(--panel);border-radius:7px;padding:3px 7px;cursor:pointer;text-align:left;max-width:100%}
+.xchip:hover{background:var(--ai-soft)}
+.xchip span{font-size:9.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.xchip b{font-size:11.8px;color:var(--ai-ink);font-weight:700}
+.xchip em{font-size:10.5px;color:var(--ink2);font-style:normal}
+.xchip.warn{border-color:var(--warn-line)} .xchip.warn b{color:var(--warn-ink)}
+.xchip.ko{border-color:var(--ko-line)} .xchip.ko b{color:var(--ko-ink)}
+.flash{animation:flash 1.9s ease}
+@keyframes flash{0%,100%{}12%,75%{background:#FFE27A;box-shadow:0 0 0 3px #FFC21A}}
+.f-sum{margin:0;padding-left:18px;font-size:12.2px;line-height:1.45}
+.f-sum li{padding-left:2px}
+.f-card{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px 10px;font-size:12px;background:var(--surf2);border-radius:8px;padding:7px 9px}
+.f-card .k{display:block;font-size:9.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.f-card .bad{color:var(--ko-ink);font-weight:700}
+.alloc-row{display:grid;grid-template-columns:44px 1fr;gap:6px;align-items:center;font-size:10.5px;color:var(--muted);font-weight:700;margin-top:5px}
+.alloc{display:flex;height:11px;border-radius:5px;overflow:hidden;background:var(--line2)}
+.alloc i{display:block;height:100%;transition:width .4s ease}
+.alloc-leg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:10.5px;color:var(--ink2);margin-top:4px}
+.alloc-leg span{display:inline-flex;align-items:center;gap:4px}
+.alloc-leg i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.ctl-list{display:flex;flex-direction:column;gap:1px}
+.ctl{display:grid;grid-template-columns:14px 132px minmax(0,1fr);gap:7px;align-items:start;font-size:11.8px;padding:3px 4px;border-radius:6px;cursor:pointer;text-align:left;border:0;background:transparent;width:100%}
+.ctl:hover{background:var(--surf2)}
+.light{width:12px;height:12px;border-radius:50%;margin-top:2px}
+.light.ok{background:var(--ok);box-shadow:0 0 0 3px rgba(28,154,87,.15)}
+.light.warn{background:var(--warn);box-shadow:0 0 0 3px rgba(217,138,4,.18)}
+.light.ko{background:var(--ko);box-shadow:0 0 0 3px rgba(209,63,56,.18)}
+.ctl b{font-weight:700}
+.ctl .why{color:var(--ink2);line-height:1.35}
+.ctl.ko .why{color:var(--ko-ink);font-weight:600}
+.ctl.warn .why{color:var(--warn-ink)}
+.act-meta{font-size:11.5px;color:var(--ink2);margin-bottom:5px}
+.act-t{width:100%;border-collapse:collapse;font-size:11.8px}
+.act-t th{font-size:9.5px;color:var(--muted);text-transform:uppercase;text-align:right;padding:3px 5px;border-bottom:1px solid var(--line2);letter-spacing:.04em}
+.act-t th:first-child,.act-t td:first-child{text-align:left}
+.act-t td{padding:3px 5px;text-align:right;border-bottom:1px solid var(--line2);font-variant-numeric:tabular-nums;white-space:nowrap}
+.act-t tr.tot td{font-weight:700;border-bottom:0}
+.mv.neg{color:var(--ko-ink);font-weight:700} .mv.pos{color:var(--ok-ink);font-weight:700}
+.readings{border:1px dashed var(--warn-line);background:var(--warnsurf);border-radius:8px;padding:7px 9px;margin-bottom:7px}
+.readings .rh{font-size:11.5px;color:var(--warn-ink);font-weight:700;margin-bottom:5px}
+.rd{display:flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:5px 8px;margin-top:4px;cursor:pointer;font-size:12px;width:100%;text-align:left}
+.rd:hover{border-color:var(--ai)}
+.rdo{display:flex;align-items:center;gap:8px;border:1px dashed var(--line3);background:var(--panel);border-radius:7px;padding:4px 8px;margin-top:4px;font-size:12px;color:var(--ink)}
+.rdo .ic{width:13px;height:13px;color:var(--warn-ink)}
+.readings .rf{font-size:11px;color:var(--ink2);margin-top:6px;display:flex;gap:6px;align-items:center}
+.readings .rf .ic{width:13px;height:13px;color:var(--ai)}
+.rd .radio{width:15px;height:15px;border-radius:50%;border:2px solid var(--line4);flex:none;display:grid;place-items:center}
+.rd.on{border-color:var(--ai);background:var(--ai-soft)}
+.rd.on .radio{border-color:var(--ai)}
+.rd.on .radio::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--ai)}
+.blocked{border:1px solid var(--ko-line);background:var(--ko-soft);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--ko-ink);line-height:1.45;display:flex;gap:8px}
+.blocked .ic{width:18px;height:18px;margin-top:1px}
+.f-decision{flex:none;border-top:1px solid var(--line);background:var(--aisurf);padding:8px 12px 9px;display:grid;grid-template-columns:minmax(0,1fr) 218px;gap:10px;position:relative;border-radius:0 0 9px 9px}
+.f-q h4{margin:0 0 3px;font-size:12.5px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.f-q h4 .guard{margin:0 0 0 4px;font-weight:600}
+.f-q p{margin:0 0 7px;font-size:12.8px;font-weight:600;line-height:1.35}
+.dbtns{display:flex;gap:4px;flex-wrap:wrap}
+.dbtn{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 7px;font-size:12px;white-space:nowrap;font-weight:700;cursor:pointer;color:var(--ink)}
+.dbtn:hover{border-color:#AEB9CC}
+.dbtn .ic{width:14px;height:14px}
+.dbtn.v{background:var(--ok);border-color:var(--ok);color:#fff}
+.dbtn.reco{box-shadow:0 0 0 3px rgba(90,63,208,.25);border-color:var(--ai);color:var(--ai-ink)}
+.dbtn[disabled]{opacity:.38;cursor:not-allowed;box-shadow:none}
+.guard{font-size:10.8px;color:var(--ai-ink);display:inline-flex;gap:5px;align-items:center;font-weight:600}
+.guard .ic{width:13px;height:13px}
+.result{display:flex;align-items:flex-start;gap:7px;font-size:12px;font-weight:700;border-radius:7px;padding:6px 9px;margin-top:6px;line-height:1.35}
+.result.ok{background:var(--ok-soft);color:var(--ok-ink)}
+.result.info{background:var(--ai-soft);color:var(--ai-ink)}
+.journal{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 8px;display:flex;flex-direction:column;min-height:0;height:100%}
+.journal h5{margin:0 0 3px;font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);display:flex;align-items:center;gap:5px}
+.jl{list-style:none;margin:0;padding:0;overflow:auto;max-height:76px;font-size:10.8px;line-height:1.3}
+.jl li{display:grid;grid-template-columns:34px 66px minmax(0,1fr);gap:4px;padding:2px 0;border-bottom:1px dashed var(--line2)}
+.jl li:last-child{border-bottom:0}
+.jl .t{color:var(--muted);font-variant-numeric:tabular-nums}
+.jl .who{font-weight:700}
+.jl .who.ai{color:var(--ai)} .jl .who.hu{color:var(--slate-ink)}
+.jl li.new{animation:jnew 1.6s ease}
+@keyframes jnew{0%{background:#FFF1B8}100%{background:transparent}}
+.f-panel{position:absolute;inset:0;background:rgba(250,249,255,.985);padding:12px 14px;overflow:auto;z-index:6;animation:winIn .2s ease}
+.f-panel h4{margin:0 0 6px;font-size:13.5px;display:flex;align-items:center;gap:7px}
+.f-panel p{margin:0 0 8px;font-size:12px;color:var(--ink2)}
+.mail{border:1px solid var(--line);border-radius:9px;background:var(--panel);padding:9px 11px;font-size:12px;margin-bottom:9px}
+.mail .mh{display:grid;grid-template-columns:52px 1fr;gap:3px 8px;margin-bottom:6px}
+.mail .mh .k{color:var(--muted);font-weight:600}
+.mail .mb{background:var(--surf2);border-radius:6px;padding:8px 9px;line-height:1.5;white-space:pre-line}
+.mail .tagai{float:right;font-size:10px;font-weight:700;color:var(--ai-ink);background:var(--ai-soft);border-radius:5px;padding:1px 6px}
+.corr-t{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px}
+.corr-t td{padding:4px 5px}
+.corr-t select,.corr-t input{font:inherit;font-size:12px;border:1px solid var(--line3);border-radius:6px;padding:4px 6px;width:100%;background:var(--panel)}
+
+/* Projecteur, curseur, annotations */
+.spot{box-shadow:0 0 0 3px var(--ai),0 0 0 9px rgba(90,63,208,.13) !important}
+.spot-lbl{position:absolute;top:-21px;right:6px;background:var(--ai);color:#fff;font-size:10.5px;font-weight:700;padding:2px 9px 3px;border-radius:7px;box-shadow:0 3px 8px rgba(90,63,208,.3);z-index:4;white-space:nowrap;display:flex;align-items:center;gap:4px;max-width:92%;overflow:hidden;text-overflow:ellipsis}
+.spot-lbl .ic{width:11px;height:11px}
+.cursor{position:absolute;left:0;top:0;width:22px;height:22px;z-index:80;pointer-events:none;transition:transform .42s cubic-bezier(.3,.7,.2,1),opacity .25s;opacity:0;transform:translate(60px,60px)}
+.cursor.show{opacity:1}
+.cursor svg{width:22px;height:22px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+.ripple{position:absolute;width:28px;height:28px;margin:-12px 0 0 -12px;border-radius:50%;border:2.5px solid var(--slate);animation:rip .5s ease-out forwards;pointer-events:none;z-index:79}
+.console[data-side=R] .ripple{border-color:var(--ai)}
+@keyframes rip{from{transform:scale(.3);opacity:1}to{transform:scale(1.7);opacity:0}}
+.note{position:absolute;z-index:70;max-width:268px;background:#FFF6D6;border:1px solid #E5C25F;color:#4A3800;font-size:11.8px;line-height:1.38;padding:7px 28px 7px 9px;border-radius:9px;box-shadow:0 8px 20px rgba(0,0,0,.14);animation:noteIn .28s ease;display:flex;gap:7px;pointer-events:auto}
+.note .ic{width:14px;height:14px;margin-top:1px}
+.pop-x{position:absolute;top:3px;right:3px;width:20px;height:20px;border:0;border-radius:5px;background:transparent;color:inherit;opacity:.65;cursor:pointer;display:grid;place-items:center;padding:0}
+.pop-x:hover{opacity:1;background:rgba(0,0,0,.08)}
+.pop-x .ic{width:12px;height:12px;margin:0;stroke-width:2.6}
+.spot-lbl{pointer-events:auto}
+.spot-lbl .pop-x{position:static;width:16px;height:16px;margin-left:3px;color:#fff;opacity:.85}
+.spot-lbl .pop-x:hover{background:rgba(255,255,255,.22)}
+.spot-lbl .pop-x .ic{width:10px;height:10px}
+.note.alert{background:#FDE7E6;border-color:#EFA7A2;color:var(--ko-ink);font-weight:600}
+.note.ai{background:var(--ai-soft);border-color:var(--ai-line);color:var(--ai-ink)}
+@keyframes noteIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.ring{position:absolute;z-index:69;border:2.5px solid var(--ko);border-radius:10px;pointer-events:none;animation:ringIn .35s ease;box-shadow:0 0 0 4px rgba(209,63,56,.15)}
+@keyframes ringIn{from{opacity:0;transform:scale(1.15)}to{opacity:1;transform:none}}
+.toast{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);background:#1B2232;color:#fff;font-size:12px;padding:7px 12px;border-radius:8px;z-index:90;white-space:nowrap;box-shadow:0 8px 20px rgba(0,0,0,.2);animation:toast 3.4s ease forwards;pointer-events:none}
+@keyframes toast{0%{opacity:0;transform:translate(-50%,8px)}8%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+.choice{position:absolute;z-index:75;background:var(--panel);border:1px solid #A9BAD3;border-radius:10px;box-shadow:0 14px 32px rgba(16,24,40,.22);padding:8px;width:290px;animation:noteIn .2s ease}
+.choice h6{margin:2px 4px 6px;font-size:11.8px;color:var(--ink2);line-height:1.35}
+.copt{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:7px;padding:6px 9px;font-size:12.3px;margin-top:4px;cursor:pointer;font-weight:600}
+.copt:hover{border-color:var(--slate);background:var(--slate-soft)}
+
+/* Superpositions */
+.overlay{position:absolute;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(229,234,242,.86);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);border-radius:14px}
+.overlay.show{display:flex}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 24px 60px rgba(16,24,40,.22);padding:20px 26px;width:1240px;max-height:97%;overflow:auto;animation:winIn .3s ease}
+.kicker{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ai);display:flex;align-items:center;gap:7px}
+.card h2{margin:4px 0 10px;font-size:22px;letter-spacing:-.01em}
+.intro-grid{display:grid;grid-template-columns:420px 1fr;gap:22px}
+.req{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--surf1)}
+.req .mh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:12px;color:var(--ink2)}
+.req blockquote{margin:0;font-size:14px;line-height:1.55;color:var(--ink)}
+.req .pjx{margin-top:9px;font-size:12px;color:var(--ink2);display:flex;gap:6px;align-items:center}
+.path-h{font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.path-start{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.pnode{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap}
+.pnode .ic{width:14px;height:14px}
+.pnode.common{background:var(--chrome)}
+.pnode.l{border-color:#AFC0D8;background:var(--slate-soft);color:var(--slate-ink)}
+.pnode.ai{border-color:var(--ai-line);background:var(--ai-soft);color:var(--ai-ink)}
+.pnode.hu{border-color:var(--ai-ink);background:var(--panel);color:var(--ai-ink)}
+.parr{color:#9AA5B8;font-weight:700;font-size:13px}
+.lane{display:grid;grid-template-columns:120px 1fr;gap:10px;align-items:center;border:1px solid var(--line2);border-radius:12px;padding:9px 11px;margin-bottom:8px}
+.lane-lbl{font-size:12px;font-weight:800;line-height:1.25}
+.lane-lbl small{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:2px}
+.lane.l .lane-lbl{color:var(--slate-ink)} .lane.r .lane-lbl{color:var(--ai-ink)}
+.lane-nodes{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.how{margin-top:12px;display:flex;align-items:center;gap:14px;border-top:1px solid var(--line2);padding-top:12px}
+.how p{margin:0;font-size:13px;color:var(--ink2);flex:1;line-height:1.45}
+.how .btn.primary{font-size:14px;padding:11px 18px}
+.end-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:6px 0 12px}
+.kpi{border:1px solid var(--ai-line);background:linear-gradient(180deg,var(--aisurf),var(--panel));border-radius:12px;padding:12px 14px}
+.kpi .big{font-size:34px;font-weight:800;color:var(--ai);line-height:1}
+.kpi .big small{font-size:14px;font-weight:700;color:var(--ai-ink);margin-left:4px}
+.kpi h6{margin:6px 0 4px;font-size:13px}
+.kpi p{margin:0;font-size:12px;color:var(--ink2);line-height:1.45}
+.cmp{display:grid;grid-template-columns:repeat(4,1fr) 1.3fr;gap:10px;margin-bottom:12px}
+.cmp>div{border:1px solid var(--line);border-radius:10px;padding:8px 11px;font-size:12px;color:var(--ink2)}
+.cmp b{font-size:17px;color:var(--ink)}
+.cmp .arrow{color:var(--muted);margin:0 6px}
+.cmp .r{color:var(--ai);font-size:17px;font-weight:800}
+.cmp .tm{background:var(--chrome);border-style:dashed;font-weight:700;display:flex;align-items:center}
+.gains{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.gain{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;background:var(--ai-soft);color:var(--ai-ink);border-radius:20px;padding:6px 12px}
+.gain .ic{width:14px;height:14px}
+.warnbox{border:1px solid var(--ko-line);background:var(--ko-soft);color:var(--ko-ink);border-radius:10px;padding:8px 11px;font-size:12.5px;margin-bottom:10px;font-weight:600}
+.decide-note{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink);background:var(--chrome);border-radius:10px;padding:9px 12px;margin-bottom:12px}
+.end-btns{display:flex;gap:8px;justify-content:flex-end}
+.btn.synth{background:var(--ai-soft);border-color:var(--ai-line);color:var(--ai-ink)}
+.btn.synth:hover{background:#E3DCFF;border-color:var(--ai)}
+#ov-synth{z-index:400;border-radius:0;background:rgba(27,34,50,.5);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+#synth-card{width:1200px;padding:24px 28px 20px;border-top-color:var(--ai)}
+#synth-card h2{font-size:21px;line-height:1.3;margin:6px 40px 6px 0}
+.sy-intro{margin:0 0 6px;font-size:14.5px;line-height:1.5;color:var(--ink2);max-width:1040px}
+.sy-banners{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:12px 0 0}
+.sy-banners .c-banner{border-radius:12px}
+.sy-principle{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:10px 0 14px}
+.sy-lead{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:14.5px;font-weight:700;color:var(--ink)}
+.sy-lead .ic{width:17px;height:17px;color:var(--ai)}
+.sy-principle span{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;background:var(--ai-soft);color:var(--ai-ink);border-radius:20px;padding:5px 12px}
+.sy-principle .ic{width:14px;height:14px}
+.sy-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.sy-card{--c:var(--scA);--cs:var(--scA-soft);--ci:var(--scA-ink);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:12px;padding:13px 14px 14px;display:flex;flex-direction:column;gap:9px;background:var(--panel)}
+.sy-card[data-v=B]{--c:var(--scB);--cs:var(--scB-soft);--ci:var(--scB-ink)}
+.sy-card[data-v=C]{--c:var(--scC);--cs:var(--scC-soft);--ci:var(--scC-ink)}
+.sy-h{min-height:40px;display:flex;align-items:center;gap:9px;font-size:15px;font-weight:800;color:var(--ci);line-height:1.25}
+.sy-h .sc-l{background:var(--c)}
+.sy-req{margin:0;font-size:12.8px;line-height:1.45;color:var(--ink2);min-height:37px}
+.sy-row{border-radius:9px;padding:7px 10px;font-size:12.8px;line-height:1.42}
+.sy-row b.t{display:block;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:2px}
+.sy-row.l{background:var(--slate-soft);color:var(--ink)} .sy-row.l b.t{color:var(--slate-ink)}
+.sy-row.r{background:var(--ai-soft);color:var(--ink);border:1px solid var(--ai-line)} .sy-row.r b.t{color:var(--ai-ink)}
+.sy-time{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink2);margin-top:auto}
+.sy-time .ic{width:14px;height:14px;color:var(--muted)}
+.sy-time b{color:var(--ink)} .sy-time .r{color:var(--ai);font-weight:800}
+.sy-go{display:flex;align-items:center;justify-content:center;gap:7px;border:0;border-radius:9px;background:var(--c);color:#fff;font-size:13.5px;font-weight:800;padding:10px 12px;cursor:pointer}
+.sy-go:hover{filter:brightness(.93)}
+.sy-go .ic{width:14px;height:14px}
+.sy-foot{margin-top:12px;font-size:11.5px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.sy-foot .ic{width:13px;height:13px}
+#ov-pause{background:rgba(229,234,242,.55);backdrop-filter:none;-webkit-backdrop-filter:none}
+.pause-pill{display:flex;align-items:center;gap:10px;background:#1B2232;color:#fff;font-weight:700;font-size:15px;padding:12px 18px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.25)}
+
+/* ---------- Onglets de scénarios (une couleur par scénario) ---------- */
+#scenbar{flex:none;height:40px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.sc-tab{--c:var(--scA);--cs:var(--scA-soft);--ci:var(--scA-ink);display:flex;align-items:center;gap:10px;border:2px solid var(--c);background:var(--cs);color:var(--ci);border-radius:10px;padding:0 14px;font-size:13.5px;cursor:pointer;text-align:left;white-space:nowrap;overflow:hidden;transition:all .2s}
+.sc-tab[data-v=B]{--c:var(--scB);--cs:var(--scB-soft);--ci:var(--scB-ink)}
+.sc-tab[data-v=C]{--c:var(--scC);--cs:var(--scC-soft);--ci:var(--scC-ink)}
+.sc-tab>span:last-child{overflow:hidden;text-overflow:ellipsis}
+.sc-tab b{font-weight:800}
+.sc-l{width:24px;height:24px;border-radius:6px;background:var(--c);color:#fff;display:grid;place-items:center;font-weight:800;font-size:13px;flex:none}
+.sc-tab:hover{filter:brightness(.97)}
+.sc-tab.on{background:var(--c);color:#fff;box-shadow:0 6px 16px rgba(16,24,40,.18)}
+.sc-tab.on .sc-l{background:#fff;color:var(--c)}
+.sc-tab:not(.on){opacity:.82}
+
+/* ---------- Fenêtres de début et de fin ---------- */
+.card{position:relative;border-top:6px solid var(--scA)}
+.card[data-sc=B]{border-top-color:var(--scB)} .card[data-sc=C]{border-top-color:var(--scC)}
+.card .sc-k{color:var(--scA-ink)} .card[data-sc=B] .sc-k{color:var(--scB-ink)} .card[data-sc=C] .sc-k{color:var(--scC-ink)}
+.card-x{position:absolute;top:12px;right:12px;width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink2);display:grid;place-items:center;cursor:pointer;z-index:2}
+.card-x:hover{background:var(--chrome);color:var(--ink)}
+.card-x .ic{width:18px;height:18px}
+#intro-card{width:860px;padding:26px 30px}
+#intro-card h2{font-size:26px;margin:6px 0 8px}
+.sc-desc{margin:0 0 14px;font-size:15px;line-height:1.5;color:var(--ink2)}
+#intro-card .how{margin-top:16px;border-top:0;padding-top:0}
+#intro-card .how p{font-size:15px;color:var(--ink);line-height:1.5}
+.cmp .tm{display:block;font-weight:500;color:var(--ink2)}
+.cmp .tm small{display:block;font-size:10.5px;color:var(--muted);margin-top:2px}
+
+/* ---------- Console de droite en mode sombre ---------- */
+.console[data-side=R]{
+  --panel:#141A2B; --surf1:#182033; --surf2:#1E2740; --wsbg:#0E1320; --winfront:#252F4A; --chrome:#1B2237; --chrome2:#283150;
+  --line:#2C3653; --line2:#232C45; --line3:#3A4666; --line4:#56637F;
+  --ink:#E8EBF4; --ink2:#B3BBCD; --muted:#8792A9;
+  --ai:#8C76FF; --ai-ink:#D2C8FF; --ai-line:#4F4392; --ai-soft:#2A2453; --aisurf:#171A31; --ai-strong:#6B54E8;
+  --ok:#22A862; --ok-ink:#8BE6B2; --ok-soft:#123826; --warn:#F0A21E; --warn-ink:#F7CB7E; --warn-soft:#3A2C0F; --warn-line:#6B5420;
+  --ko:#F0574F; --ko-ink:#FFA59F; --ko-soft:#41191A; --ko-line:#7A2E2B; --target:#2B2715; --warnsurf:#2A2312;
+  background:var(--panel);border-color:#2A3350;color:var(--ink);box-shadow:0 12px 30px rgba(10,14,28,.35)}
+.console[data-side=R] .c-cap{border-color:var(--ok);background:#10261A}
+.console[data-side=R] .c-cap.attn{animation-name:capAttnGD}
+.console[data-side=R] .c-cap.attn .cap-text{animation:capIn .35s ease, capInkGD 2.85s ease}
+@keyframes capAttnGD{0%{box-shadow:0 0 0 0 rgba(34,168,98,.6);background:#1C4A31}55%{box-shadow:0 0 0 5px rgba(34,168,98,.2);background:#153A27}100%{box-shadow:0 0 0 0 rgba(34,168,98,0);background:#10261A}}
+@keyframes capInkGD{0%,60%{color:#A6F2C6}100%{color:var(--ink)}}
+.console[data-side=R] mark.x{background:rgba(140,118,255,.22);border-bottom-color:rgba(170,152,255,.8)}
+.console[data-side=R] .flash{animation:flashD 1.9s ease}
+@keyframes flashD{0%,100%{}12%,75%{background:#5B4A12;box-shadow:0 0 0 3px #E0B42A;color:#FFF3C4}}
+.console[data-side=R] .jl li.new{animation:jnewD 1.6s ease}
+@keyframes jnewD{0%{background:#4A3F12}100%{background:transparent}}
+.console[data-side=R] .f-panel{background:rgba(20,26,43,.985)}
+.console[data-side=R] .toast{background:#E8EBF4;color:#141A2B}
+.console[data-side=R] .corr-t select,.console[data-side=R] .corr-t input{background:var(--surf2);color:var(--ink);border-color:var(--line3)}
+.console[data-side=R] .ib-row.target td{background:var(--target)}
+.console[data-side=R] .st.new{background:#3A2C0F;color:var(--warn-ink)}
+.console[data-side=R] .f-pj-view{background:#0B0F1A}
+.console[data-side=R] .dbtn.v{color:#fff}
+.console[data-side=R] .fiche{box-shadow:0 14px 34px rgba(0,0,0,.45)}
+.console[data-side=R] .light.ok{box-shadow:0 0 0 3px rgba(34,168,98,.25)}
+.console[data-side=R] .ripple{border-color:var(--ai)}
+.console[data-side=R] .spot{box-shadow:0 0 0 3px var(--ai),0 0 0 9px rgba(140,118,255,.18) !important}
+.console[data-side=R] .jl .who.hu{color:#A9C4FF}
+.console[data-side=R] .apps-lbl,.console[data-side=R] .tb-lbl,.console[data-side=R] .fr-h{color:#8F9AB2}
+</style>
+</head>
+<body>
+<div id="viewport">
+<div id="stage">
+
+  <header id="topbar">
+    <div class="brand">
+      <div class="brand-mark" id="brand-mark"></div>
+      <div style="min-width:0">
+        <div class="brand-title">Démonstrateur CRC · Assurance Vie</div>
+        <div class="brand-sub">Traitement d’une demande entrante · données fictives</div>
+      </div>
+    </div>
+    <button class="btn synth" id="btn-synth" data-action="synth" title="Synthèse du démonstrateur · raccourci : S">Synthèse</button>
+    <div class="grp" role="group" aria-label="Mode">
+      <button class="seg" data-action="mode" data-v="guided" aria-pressed="false">Démo guidée</button>
+      <button class="seg" data-action="mode" data-v="free" aria-pressed="false">À vous de jouer</button>
+    </div>
+    <button class="btn primary" id="btn-next" data-action="next">Suivant</button>
+    <button class="btn" id="btn-prev" data-action="prev">Revenir à l’étape précédente</button>
+    <button class="btn" id="btn-pause" data-action="pause">Pause</button>
+    <button class="btn" id="btn-reset" data-action="reset">Réinitialiser</button>
+  </header>
+
+  <nav id="scenbar" role="group" aria-label="Scénario">
+    <button class="sc-tab" data-action="scenario" data-v="A" aria-pressed="false"><span class="sc-l">A</span><span><b>Scénario A</b> – Demande d’arbitrage complète et conforme</span></button>
+    <button class="sc-tab" data-action="scenario" data-v="B" aria-pressed="false"><span class="sc-l">B</span><span><b>Scénario B</b> – Demande d’arbitrage imprécise</span></button>
+    <button class="sc-tab" data-action="scenario" data-v="C" aria-pressed="false"><span class="sc-l">C</span><span><b>Scénario C</b> – Demande d’arbitrage non conforme</span></button>
+  </nav>
+
+  <main id="consoles">
+    <div class="c-banner l" id="banner-L"></div>
+    <div class="c-banner r" id="banner-R"></div>
+    <section class="console" id="console-L" data-side="L" aria-label="Console actuelle"></section>
+    <section class="console" id="console-R" data-side="R" aria-label="Console cible avec agent IA"></section>
+    <div class="overlay" id="ov-intro"><div class="card" id="intro-card"></div></div>
+    <div class="overlay" id="ov-end"><div class="card" id="end-card"></div></div>
+    <div class="overlay" id="ov-pause"><div class="pause-pill" id="pause-pill"></div></div>
+  </main>
+  <section id="counters" aria-label="Compteur : comparaison des deux consoles">
+    <div class="c-legend">
+      <div class="cnt-title"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18a8 8 0 1 1 16 0"/><path d="M12 18l4.5-6"/><path d="M12 18h.01"/></svg>Compteur <small>· en direct</small></div>
+      <div class="lg"><span class="sw l"></span>Aujourd’hui – sans IA</div>
+      <div class="lg"><span class="sw r"></span>À l’ère de l’IA agentique</div>
+    </div>
+    <div class="tile"><div class="t-lbl">Étapes réalisées</div>
+      <div class="t-row l"><span class="t-v" id="v-L-steps">0</span><span class="t-bar"><i id="b-L-steps"></i></span></div>
+      <div class="t-row r"><span class="t-v" id="v-R-steps">0</span><span class="t-bar"><i id="b-R-steps"></i></span></div>
+    </div>
+    <div class="tile"><div class="t-lbl">Clics</div>
+      <div class="t-row l"><span class="t-v" id="v-L-clicks">0</span><span class="t-bar"><i id="b-L-clicks"></i></span></div>
+      <div class="t-row r"><span class="t-v" id="v-R-clicks">0</span><span class="t-bar"><i id="b-R-clicks"></i></span></div>
+    </div>
+    <div class="tile"><div class="t-lbl">Outils ouverts</div>
+      <div class="t-row l"><span class="t-v" id="v-L-tools">0</span><span class="t-bar"><i id="b-L-tools"></i></span></div>
+      <div class="t-row r"><span class="t-v" id="v-R-tools">0</span><span class="t-bar"><i id="b-R-tools"></i></span></div>
+    </div>
+    <div class="tile"><div class="t-lbl">Ressaisies</div>
+      <div class="t-row l"><span class="t-v" id="v-L-rekeys">0</span><span class="t-bar"><i id="b-L-rekeys"></i></span></div>
+      <div class="t-row r"><span class="t-v" id="v-R-rekeys">0</span><span class="t-bar"><i id="b-R-rekeys"></i></span></div>
+    </div>
+    <div class="tile"><div class="t-lbl">Contrôles</div>
+      <div class="t-row l"><span class="t-v" id="v-L-controls">0</span><span class="t-note" id="n-L-controls">faits à la main</span></div>
+      <div class="t-row r"><span class="t-v" id="v-R-controls">0</span><span class="t-note" id="n-R-controls">faits automatiquement</span></div>
+    </div>
+    <div class="tile"><div class="t-lbl">Anomalies · étape</div>
+      <div class="t-row l"><span class="t-v" id="v-L-anoms">0</span><span class="t-note" id="n-L-anoms">—</span></div>
+      <div class="t-row r"><span class="t-v" id="v-R-anoms">0</span><span class="t-note" id="n-R-anoms">—</span></div>
+    </div>
+    <div class="tile time" title="Estimation indicative du temps passé par le Conseiller CRC sur la demande"><div class="t-lbl">Temps de traitement estimé</div>
+      <div class="t-row l"><span class="t-v tm" id="v-L-time">0 min</span><span class="t-bar"><i id="b-L-time"></i></span></div>
+      <div class="t-row r"><span class="t-v tm" id="v-R-time">0 min</span><span class="t-bar"><i id="b-R-time"></i></span></div>
+    </div>
+  </section>
+
+  <div class="overlay" id="ov-synth" role="dialog" aria-modal="true" aria-label="Synthèse du démonstrateur"><div class="card" id="synth-card"></div></div>
+
+</div>
+</div>
+<script>
+'use strict';
+/* =====================================================================
+   Démonstrateur CRC Assurance Vie — toutes les données sont fictives.
+   ===================================================================== */
+
+/* ---------- Utilitaires ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const NNBSP = '\u202f', NBSP = '\u00a0';
+function eur(n) { return Math.round(n).toLocaleString('fr-FR').replace(/[\s\u00a0\u202f]/g, NNBSP) + NBSP + '€'; }
+function pct(x) { const v = Math.round(x * 1000) / 10; return (Number.isInteger(v) ? String(v) : v.toFixed(1).replace('.', ',')) + NBSP + '%'; }
+function joinFr(list) { const l = list.filter(Boolean); if (l.length <= 1) return l[0] || ''; return l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1]; }
+const pad = n => String(n).padStart(2, '0');
+const fmtD = d => pad(d.getDate()) + '/' + pad(d.getMonth() + 1) + '/' + d.getFullYear();
+const fmtHM = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+const dkey = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+
+/* Jours fériés français (dont Pâques, Ascension, Pentecôte) pour calculer J+2 jours ouvrés */
+function easter(y) {
+  const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4,
+    f = Math.floor((b + 8) / 25), g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30,
+    i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7, m = Math.floor((a + 11 * h + 22 * l) / 451),
+    month = Math.floor((h + l - 7 * m + 114) / 31), day = ((h + l - 7 * m + 114) % 31) + 1;
+  return new Date(y, month - 1, day);
+}
+const _hol = {};
+function holidays(y) {
+  if (_hol[y]) return _hol[y];
+  const e = easter(y);
+  const add = n => { const x = new Date(e); x.setDate(x.getDate() + n); return x; };
+  _hol[y] = new Set([new Date(y, 0, 1), add(1), new Date(y, 4, 1), new Date(y, 4, 8), add(39), add(50),
+    new Date(y, 6, 14), new Date(y, 7, 15), new Date(y, 10, 1), new Date(y, 10, 11), new Date(y, 11, 25)].map(dkey));
+  return _hol[y];
+}
+function isBiz(d) { const w = d.getDay(); return w !== 0 && w !== 6 && !holidays(d.getFullYear()).has(dkey(d)); }
+function addBiz(d, n) { const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); let k = 0; while (k < n) { x.setDate(x.getDate() + 1); if (isBiz(x)) k++; } return x; }
+
+const NOW = new Date();
+const YEAR = NOW.getFullYear();
+const VALUE_DATE = fmtD(addBiz(NOW, 2));
+const SIGN_DATE = (() => { const d = new Date(NOW); d.setDate(d.getDate() - 2); return fmtD(d); })();
+
+/* ---------- Icônes (SVG en ligne) ---------- */
+const ICONS = {
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>',
+  lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+  clip: '<path d="M20.5 11.5l-8.2 8.2a5 5 0 0 1-7.1-7.1l8.5-8.5a3.4 3.4 0 0 1 4.8 4.8l-8.4 8.4a1.8 1.8 0 0 1-2.5-2.5l7.7-7.7"/>',
+  folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  book: '<path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/>',
+  keyboard: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/>',
+  checklist: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8.5l1.5 1.5 2.5-3M8 14.5l1.5 1.5 2.5-3M14.5 9h2.5M14.5 15h2.5"/>',
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  alert: '<path d="M12 3.5l9.5 17h-19z"/><path d="M12 10v4.5M12 17.5h.01"/>',
+  spark: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M18.5 15.5l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  phone: '<path d="M5 3h4l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 5a2 2 0 0 1 2-2z"/>',
+  letter: '<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M8 8h8M8 12h8M8 16h5"/>',
+  globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  at: '<circle cx="12" cy="12" r="4"/><path d="M16 12v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1"/>',
+  zin: '<circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.5-4.5M11 8v6M8 11h6"/>',
+  zout: '<circle cx="11" cy="11" r="7"/><path d="M20.5 20.5l-4.5-4.5M8 11h6"/>',
+  level: '<path d="M4 17L20 7"/><path d="M4 7h16M4 17h16" opacity=".35"/>',
+  send: '<path d="M21.5 2.5L11 13"/><path d="M21.5 2.5l-7 19-3.5-8.5L2.5 9.5z"/>',
+  fwd: '<path d="M15 5l6 6-6 6"/><path d="M21 11H10a7 7 0 0 0-7 7v1"/>',
+  reply: '<path d="M9 5L3 11l6 6"/><path d="M3 11h11a7 7 0 0 1 7 7v1"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  play: '<path d="M7 4.5l12.5 7.5L7 19.5z"/>',
+  pause: '<path d="M8.5 5v14M15.5 5v14"/>',
+  reset: '<path d="M4 12a8 8 0 1 0 2.4-5.7"/><path d="M4 4v5h5"/>',
+  next: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  back: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+  ff: '<path d="M4 6l8 6-8 6zM12 6l8 6-8 6z"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+  up: '<path d="M12 20V5M6 11l6-6 6 6"/>',
+  inbox: '<path d="M3 13h5l2 3h4l2-3h5"/><path d="M5.5 5h13L21 13v6H3v-6z"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/>',
+  doc: '<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/>',
+  eye: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  log: '<path d="M8 6h12M8 12h12M8 18h12"/><path d="M4 6h.01M4 12h.01M4 18h.01"/>',
+  bulb: '<path d="M9 18h6M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2V16h5v-.1c0-.8.4-1.5 1-2A6 6 0 0 0 12 3z"/>',
+  target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
+  chevron: '<path d="M9 6l6 6-6 6"/>',
+  layers: '<path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/>',
+  window: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/>',
+  repeat: '<path d="M17 2l4 4-4 4"/><path d="M3 11V9a3 3 0 0 1 3-3h15"/><path d="M7 22l-4-4 4-4"/><path d="M21 13v2a3 3 0 0 1-3 3H3"/>',
+  brain: '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a2 2 0 0 0-3-1zM15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/>',
+};
+function ic(n, c = '') { return `<svg class="ic ${c}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[n] || ''}</svg>`; }
+const CURSOR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 2.5l15 9.2-6.6 1.4 3.9 7.2-2.7 1.4-3.8-7.2L4.9 19z" fill="#111827" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+
+/* ---------- Référentiels fictifs ---------- */
+const SUPPORTS = [
+  { s: 'Fonds euros', type: 'Support en euros', open: true, color: '#97A6BF' },
+  { s: 'Actions Monde', type: 'UC · actions internationales', open: true, color: '#5A3FD0' },
+  { s: 'Actions Europe', type: 'UC · actions européennes', open: true, color: '#A08FF0' },
+  { s: 'Obligations Euro', type: 'UC · obligations zone euro', open: true, color: '#2A9D8F' },
+  { s: 'Immobilier Europe', type: 'UC · immobilier', open: false, color: '#D4A72C' },
+];
+const SUP = Object.fromEntries(SUPPORTS.map(x => [x.s, x]));
+const MIN_SUP = 1000;
+
+const CONTRACTS = {
+  'AV-000123': {
+    num: 'AV-000123', product: 'Contrat multisupport Vie', holder: 'Claire Martin', effet: '12/03/2014',
+    hold: { 'Fonds euros': 48000 }, procuration: 'Aucune', nanti: false, nantiTxt: 'Non', opposition: 'Non', arb: 0,
+    lastAct: 'Versement libre · ' + (YEAR - 1),
+  },
+  'AV-000456': {
+    num: 'AV-000456', product: 'Contrat multisupport Vie', holder: 'Jean Durand', effet: '05/09/2011',
+    hold: { 'Fonds euros': 65000, 'Obligations Euro': 15000 }, procuration: 'Aucune', nanti: true,
+    nantiTxt: 'Oui — Banque Alpha (prêt immobilier)', opposition: 'Non', arb: 0,
+    lastAct: 'Avenant de nantissement · 2022',
+  },
+};
+
+/* Les 5 autres demandes de la corbeille (identiques dans les deux consoles) */
+const OTHER_ROWS = [
+  { ch: 'phone', chl: 'Téléphone · rappel', who: 'Bernard Petit', obj: 'Relevé de situation annuel', ct: 'AV-000781', ago: 6 },
+  { ch: 'letter', chl: 'Courrier scanné', who: 'Nadia Benali', obj: 'Changement d’adresse', ct: 'AV-000342', ago: 14 },
+  { ch: 'at', chl: 'E-mail', who: 'Paul Lefèvre', obj: 'Attestation de versement', ct: 'AV-000219', ago: 23 },
+  { ch: 'globe', chl: 'Formulaire web', who: 'Hélène Roux', obj: 'Clause bénéficiaire', ct: 'AV-000654', ago: 37 },
+  { ch: 'lock', chl: 'Message sécurisé', who: 'Marc Girard', obj: 'Rachat partiel : délai ?', ct: 'AV-000903', ago: 52 },
+];
+
+/* Temps de traitement estimé du Conseiller CRC, en minutes, par étape (estimations indicatives).
+   À gauche : lecture, recherches dans chaque outil, ressaisie et contrôles faits à la main.
+   À droite : la préparation par l’Agent IA se fait en amont ; seul le temps du Conseiller CRC est compté. */
+const DUR = {
+  A: { L: { msg: 1, pj: 1.5, contrat: 1.5, cata: 1.5, saisie: 4, chk: 1.5, decision: 2.5 }, R: { open: 0.5, verify: 1.5, decide: 0.5 } },
+  B: { L: { msg: 1.5, pj: 1.5, contrat: 1.5, cata: 1.5, saisie: 5, chk: 1.5, decision: 4 }, R: { open: 0.5, verify: 1, decide: 1 } },
+  C: { L: { msg: 1, pj: 1.5, contrat: 1.5, cata: 1.5, saisie: 4, chk: 1.5, decision: 4 }, R: { open: 0.5, verify: 1, decide: 1 } },
+};
+function fmtMin(m) {
+  if (!m) return '0 min';
+  const mi = Math.floor(m), s = Math.round((m - mi) * 60);
+  return '≈' + NBSP + (mi ? mi + NBSP + 'min' : '') + (s ? (mi ? NBSP : '') + s + NBSP + 's' : '');
+}
+const TOOL_NAMES = { msg: 'Message', pj: 'Visionneuse', contrat: 'Contrat', cata: 'Catalogue', saisie: 'Saisie de l’acte', chk: 'Check-list', fiche: 'Fiche de décision' };
+
+const CHECKS = [
+  ['solde', 'Solde suffisant sur le support désinvesti'],
+  ['supports', 'Supports cibles ouverts à l’arbitrage'],
+  ['minimum', 'Minimum de 1 000 € par support respecté'],
+  ['blocage', 'Absence de blocage (nantissement, opposition…)'],
+  ['demandeur', 'Demandeur = titulaire (ou pouvoir valide)'],
+  ['signature', 'Signature présente et conforme'],
+  ['dic', 'Document d’information remis'],
+];
+
+const FIELDS = [
+  { id: 'contrat', l: 'N° de contrat', full: true },
+  { id: 'dSup', l: 'Support désinvesti' }, { id: 'dMnt', l: 'Montant désinvesti' },
+  { id: 'i1Sup', l: 'Support investi n° 1' }, { id: 'i1Mnt', l: 'Montant investi n° 1' },
+  { id: 'i2Sup', l: 'Support investi n° 2' }, { id: 'i2Mnt', l: 'Montant investi n° 2' },
+  { id: 'date', l: 'Date de valeur' }, { id: 'frais', l: 'Frais d’arbitrage' },
+];
+
+/* ---------- Les trois scénarios (identiques dans les deux consoles) ---------- */
+const SIGNOFF = '\nBien cordialement,\nVotre conseiller du centre de relation client';
+const SC = {
+  A: {
+    id: 'A', name: 'Demande d’arbitrage complète et conforme', title: 'Claire Martin, titulaire du contrat, demande par message sécurisé un arbitrage de 15 000 € de son fonds euros vers deux supports en unités de compte. Sa demande est complète et tous les contrôles sont conformes.',
+    contract: 'AV-000123', sender: 'Claire Martin', senderSpace: 'espace client de la titulaire', holderSender: true,
+    msg: 'Bonjour, je voudrais déplacer [[k2|15 000 € de mon fonds en euros]] vers deux supports en unités de compte : [[k3|10 000 € sur Actions Monde]] et [[k4|le reste sur Obligations Euro]]. Contrat [[k1|AV-000123]]. [[k7|Pouvez-vous me confirmer que c’est pris en compte ?]] Claire Martin',
+    pj: 'formulaire_arbitrage_scan.pdf',
+    form: { contrat: 'AV-000123', nom: 'MARTIN', prenom: 'Claire', desinv: 'Fonds euros', montant: '15 000 €', inv: [['Actions Monde', '10 000 €', 'k3'], ['Obligations Euro', 'le reste', 'k4']], lieu: 'Lyon', sign: 'C. Martin', signNote: '' },
+    req: { amount: 15000, to: [['Actions Monde', 10000], ['Obligations Euro', 5000]] },
+    prepared: true,
+    chips: [
+      { k: 'k1', l: 'Contrat', v: 'AV-000123' },
+      { k: 'k2', l: 'Désinvestir', v: '15 000 € · fonds euros' },
+      { k: 'k3', l: 'Investir', v: '10 000 € · Actions Monde' },
+      { k: 'k4', l: 'Investir', v: '5 000 € · Obligations Euro', n: '« le reste », calculé' },
+      { k: 'k5', l: 'Signature', v: 'présente et datée' },
+      { k: 'k6', l: 'Document d’information', v: 'accusé de réception coché' },
+      { k: 'k7', l: 'Attente cliente', v: 'une confirmation' },
+    ],
+    summary: () => [
+      'Claire Martin, titulaire, écrit via la messagerie sécurisée de l’application.',
+      `Arbitrage de ${eur(15000)} depuis le fonds euros (solde : ${eur(48000)}).`,
+      `Vers Actions Monde ${eur(10000)} et Obligations Euro ${eur(5000)} (« le reste », calculé).`,
+      '7 contrôles sur 7 au vert : rien ne bloque.',
+      `Acte pré-rempli, valeur au ${VALUE_DATE}, frais 0 €. La cliente attend une confirmation.`,
+    ],
+    mails: {
+      renvoyer: { title: 'Renvoyer au client', to: 'Claire Martin · messagerie sécurisée', subject: 'Votre demande d’arbitrage · contrat AV-000123', send: 'Envoyer au client',
+        body: 'Bonjour Madame Martin,\nNous avons bien reçu votre demande d’arbitrage. Pour la traiter, pourriez-vous nous préciser : [point à compléter] ?' + SIGNOFF },
+      escalader: { title: 'Escalader', to: 'Superviseur CRC', subject: 'AV-000123 · avis demandé avant validation d’un arbitrage', send: 'Envoyer l’escalade',
+        body: 'Bonjour,\nAvant de valider l’arbitrage de Claire Martin (contrat AV-000123), je souhaite ton avis. La fiche de décision préparée par l’Agent IA est jointe : résumé, 7 contrôles, acte pré-rempli.\nMotif : [à compléter]\nMerci.' },
+    },
+  },
+  B: {
+    id: 'B', name: 'Demande d’arbitrage imprécise', title: 'Claire Martin demande d’arbitrer « la moitié » de son fonds euros vers « vos supports actions », sans préciser la répartition entre les supports. L’ordre est incomplet : le Conseiller CRC doit lui demander une précision avant toute exécution.',
+    contract: 'AV-000123', sender: 'Claire Martin', senderSpace: 'espace client de la titulaire', holderSender: true,
+    msg: 'Bonjour, je souhaite arbitrer [[k2|la moitié de mon fonds euros]] vers [[k3|vos supports actions]]. Merci. Claire Martin, contrat [[k1|AV-000123]]',
+    pj: 'formulaire_arbitrage_scan.pdf',
+    form: { contrat: 'AV-000123', nom: 'MARTIN', prenom: 'Claire', desinv: 'Fonds euros', montant: 'la moitié', inv: [['supports actions', '', 'k3']], lieu: 'Lyon', sign: 'C. Martin', signNote: '' },
+    req: { amount: 24000, to: null },
+    /* Répartitions possibles : listées pour la cliente, jamais choisies à sa place */
+    readings: [
+      { id: 'r1', label: `Tout sur Actions Monde (${eur(24000)})` },
+      { id: 'r2', label: `${eur(12000)} sur Actions Monde et ${eur(12000)} sur Actions Europe` },
+      { id: 'r3', label: `Tout sur Actions Europe (${eur(24000)})` },
+    ],
+    prepared: true,
+    chips: [
+      { k: 'k1', l: 'Contrat', v: 'AV-000123' },
+      { k: 'k2', l: 'Désinvestir', v: '24 000 € · fonds euros', n: '« la moitié » = 50 % × 48 000 €' },
+      { k: 'k3', l: 'Investir', v: 'supports actions', n: 'répartition non précisée', cls: 'warn' },
+      { k: 'k5', l: 'Signature', v: 'présente et datée' },
+      { k: 'k6', l: 'Document d’information', v: 'case cochée', n: 'supports non désignés', cls: 'warn' },
+    ],
+    summary: (R) => [
+      'Claire Martin, titulaire, écrit via la messagerie sécurisée de l’application.',
+      `« La moitié de mon fonds euros » = ${eur(24000)} (50 % de ${eur(48000)}).`,
+      '« Vos supports actions » : Actions Monde et Actions Europe sont ouverts, la répartition n’est pas précisée.',
+      `${stTxt(countSt(R && R.ctrls && R.ctrls.length ? R.ctrls : evalControls(SC.B, SC.B.req)))} : ordre incomplet, non exécutable en l’état.`,
+      'Recommandation : demander une précision à la cliente (message pré-rédigé), acte conservé.',
+    ],
+    mails: {
+      renvoyer: { title: 'Demander une précision', to: 'Claire Martin · messagerie sécurisée', subject: 'Votre demande d’arbitrage · contrat AV-000123', send: 'Envoyer la demande de précision',
+        body: `Bonjour Madame Martin,\nVous souhaitez arbitrer la moitié de votre fonds euros, soit ${eur(24000)}, vers nos supports actions. Deux supports actions sont ouverts sur votre contrat : Actions Monde et Actions Europe. Pour exécuter votre demande, merci de nous indiquer la répartition souhaitée, par exemple :\n• tout sur Actions Monde ;\n• ${eur(12000)} sur Actions Monde et ${eur(12000)} sur Actions Europe ;\n• tout sur Actions Europe.\nToute autre répartition est possible, avec un minimum de 1 000 € par support. Le document d’information clé de chaque support est disponible dans votre espace client.\nDès réception de votre réponse, votre arbitrage sera traité avec une date de valeur à J+2 jours ouvrés.` + SIGNOFF },
+      escalader: { title: 'Escalader', to: 'Superviseur CRC', subject: 'AV-000123 · arbitrage incomplet, avis demandé', send: 'Envoyer l’escalade',
+        body: 'Bonjour,\nLa demande de Claire Martin (contrat AV-000123) est incomplète : « la moitié » de son fonds euros (24 000 €) vers « vos supports actions », sans répartition entre Actions Monde et Actions Europe. Je prévois de lui demander une précision (message pré-rédigé par l’Agent IA, fiche jointe).\nEs-tu d’accord ?\nMerci.' },
+    },
+  },
+  C: {
+    id: 'C', name: 'Demande d’arbitrage non conforme', title: 'La fille du titulaire demande un arbitrage sur le contrat de son père, sans procuration. Le contrat est par ailleurs nanti au profit d’une banque : la demande ne peut pas être exécutée en l’état.',
+    contract: 'AV-000456', sender: 'Sophie Durand', senderSpace: 'espace client de Sophie Durand', holderSender: false,
+    msg: 'Bonjour, [[k8|je suis la fille de M. Durand]] et je voudrais arbitrer son contrat [[k1|AV-000456]] vers [[k3|des supports actions]]. Pouvez-vous le faire ?',
+    pj: 'formulaire_arbitrage.pdf',
+    form: { contrat: 'AV-000456', nom: 'DURAND', prenom: 'Jean', desinv: 'Fonds euros', montant: '20 000 €', inv: [['Actions Monde', '10 000 €', 'k3'], ['Actions Europe', '10 000 €', 'k3']], lieu: 'Nantes', sign: 'S. Durand', signNote: 'pour mon père' },
+    req: { amount: 20000, to: [['Actions Monde', 10000], ['Actions Europe', 10000]] },
+    prepared: false,
+    chips: [
+      { k: 'k8', l: 'Demandeuse', v: 'Sophie Durand', n: 'se dit fille du titulaire', cls: 'ko' },
+      { k: 'k1', l: 'Contrat', v: 'AV-000456', n: 'titulaire : Jean Durand' },
+      { k: 'k2', l: 'Désinvestir', v: '20 000 € · fonds euros' },
+      { k: 'k3', l: 'Investir', v: 'Actions Monde, Actions Europe', n: '10 000 € chacun' },
+      { k: 'k5', l: 'Signature', v: '« S. Durand, pour mon père »', cls: 'warn' },
+      { k: 'k6', l: 'Document d’information', v: 'accusé de réception coché' },
+    ],
+    summary: () => [
+      'Sophie Durand se présente comme la fille du titulaire, Jean Durand.',
+      'Contrat AV-000456 : aucune procuration ni mandat à son nom.',
+      'Contrat nanti au profit de Banque Alpha : accord du créancier requis.',
+      '2 contrôles rouges et 1 orange : l’acte n’est pas préparé.',
+      'Recommandation : escalader au service Juridique & Nantissements.',
+    ],
+    mails: {
+      renvoyer: { title: 'Renvoyer à la demandeuse', to: 'Sophie Durand · messagerie sécurisée', subject: 'Votre demande concernant le contrat AV-000456', send: 'Envoyer à la demandeuse',
+        body: 'Bonjour Madame,\nNous avons bien reçu votre message. Seul le titulaire du contrat, ou une personne disposant d’un pouvoir, peut demander un arbitrage. Nous vous invitons à demander à M. Durand de nous contacter directement.' + SIGNOFF },
+      escalader: { title: 'Escalader', to: 'Service Juridique & Nantissements', subject: 'AV-000456 · arbitrage demandé par un tiers sur un contrat nanti', send: 'Envoyer l’escalade',
+        body: `Bonjour,\nDemande d’arbitrage de ${eur(20000)} (fonds euros vers Actions Monde ${eur(10000)} et Actions Europe ${eur(10000)}) reçue par message sécurisé de Sophie Durand, fille du titulaire Jean Durand.\nPoints bloquants détectés :\n1. Demandeuse sans procuration ni mandat enregistré.\n2. Contrat nanti au profit de Banque Alpha : accord écrit du créancier requis.\nPièces jointes : message, formulaire, fiche contrat, résultat des contrôles.\nMerci de votre prise en charge.`,
+        extra: { to: 'Sophie Durand · messagerie sécurisée', subject: 'Votre demande concernant le contrat AV-000456', body: 'Bonjour Madame,\nVotre demande a bien été reçue. Elle nécessite une vérification complémentaire par un service spécialisé, qui reviendra vers vous.' + SIGNOFF } },
+    },
+  },
+};
+
+/* ---------- Contrôles exécutés par l’Agent IA ---------- */
+function targetsText(to) { return joinFr((to || []).map(([s, v]) => `${s} (${eur(v)})`)); }
+function evalControls(sc, req) {
+  const c = CONTRACTS[sc.contract], fe = c.hold['Fonds euros'] || 0;
+  const amount = req.amount, to = req.to;
+  const out = [];
+  out.push(amount <= fe
+    ? { id: 'solde', n: 'Solde suffisant', st: 'ok', why: `${eur(amount)} ≤ ${eur(fe)} sur le fonds euros`, tip: 'Le montant demandé ne dépasse pas le solde disponible du fonds euros.', k: ['k2', 'kB'] }
+    : { id: 'solde', n: 'Solde suffisant', st: 'ko', why: `${eur(amount)} > ${eur(fe)} sur le fonds euros`, tip: 'Le montant demandé dépasse le solde disponible du fonds euros.', k: ['k2', 'kB'] });
+  if (!to) {
+    out.push({ id: 'supports', n: 'Supports ouverts', st: 'warn', why: 'Répartition non précisée : 2 supports actions ouverts', tip: 'Actions Monde et Actions Europe sont deux supports actions ouverts. La répartition doit être indiquée par la cliente : le Conseiller CRC ne peut pas la choisir à sa place.', k: ['k3'] });
+    out.push({ id: 'minimum', n: 'Minimum respecté', st: 'ok', why: `${eur(amount)} ≥ 1 000 € · à revérifier à la réponse`, tip: 'Le montant total permet de respecter le minimum de 1 000 € par support ; à revérifier selon la répartition choisie par la cliente.', k: ['k2'] });
+  } else {
+    const closed = to.filter(([s]) => !(SUP[s] && SUP[s].open)).map(t => t[0]);
+    out.push(closed.length
+      ? { id: 'supports', n: 'Supports ouverts', st: 'ko', why: `${joinFr(closed)} : fermé à l’arbitrage`, tip: 'Un support cible est fermé aux arbitrages entrants.', k: ['k3', 'k4'] }
+      : { id: 'supports', n: 'Supports ouverts', st: 'ok', why: `${joinFr(to.map(t => t[0]))} : ouverts`, tip: 'Tous les supports cibles sont ouverts à l’arbitrage.', k: ['k3', 'k4'] });
+    const low = to.filter(t => t[1] < MIN_SUP);
+    out.push(low.length
+      ? { id: 'minimum', n: 'Minimum respecté', st: 'ko', why: `${joinFr(low.map(t => eur(t[1])))} < 1 000 € par support`, tip: 'Un montant est inférieur au minimum de 1 000 € par support.', k: ['k3', 'k4'] }
+      : { id: 'minimum', n: 'Minimum respecté', st: 'ok', why: `${joinFr(to.map(t => eur(t[1])))} ≥ 1 000 €`, tip: 'Chaque montant respecte le minimum de 1 000 € par support.', k: ['k3', 'k4'] });
+  }
+  out.push(c.nanti
+    ? { id: 'blocage', n: 'Absence de blocage', st: 'ko', why: 'Contrat nanti (Banque Alpha) : accord requis', tip: 'Le contrat est nanti au profit de Banque Alpha : tout arbitrage requiert l’accord écrit du créancier nanti.', k: ['kN'] }
+    : { id: 'blocage', n: 'Absence de blocage', st: 'ok', why: 'Ni nantissement ni opposition', tip: 'Aucun nantissement ni opposition enregistré sur le contrat.', k: ['kN'] });
+  out.push(sc.holderSender
+    ? { id: 'demandeur', n: 'Demandeur = titulaire', st: 'ok', why: 'Envoyé depuis l’espace de la titulaire', tip: `Le message a été émis depuis l’espace client de la titulaire, ${c.holder}.`, k: ['kH'] }
+    : { id: 'demandeur', n: 'Demandeur = titulaire', st: 'ko', why: 'Sa fille, sans procuration ni mandat', tip: `Demande de ${sc.sender}, qui se présente comme la fille du titulaire (${c.holder}). Aucune procuration ni mandat enregistré.`, k: ['k8', 'kH', 'kP', 'kS'] });
+  out.push(sc.id === 'C'
+    ? { id: 'signature', n: 'Signature', st: 'warn', why: 'Signé « S. Durand », pas par le titulaire', tip: 'Le formulaire est signé par la demandeuse, pas par le titulaire du contrat.', k: ['k5'] }
+    : { id: 'signature', n: 'Signature', st: 'ok', why: 'Formulaire signé et daté par la titulaire', tip: 'Signature présente et datée sur le formulaire.', k: ['k5'] });
+  if (!to) out.push({ id: 'dic', n: 'Doc. d’information', st: 'warn', why: 'Supports non désignés : DIC à confirmer', tip: 'La case est cochée, mais les supports ne sont pas désignés : la remise du DIC des supports retenus est à confirmer.', k: ['k6'] });
+  else out.push({ id: 'dic', n: 'Doc. d’information', st: 'ok', why: sc.id === 'C' ? 'DIC disponibles dans l’espace du titulaire' : 'Accusé de réception des DIC coché', tip: 'Document d’information clé des supports concernés remis.', k: ['k6'] });
+  return out;
+}
+function countSt(list) { const c = { ok: 0, warn: 0, ko: 0 }; list.forEach(x => c[x.st]++); return c; }
+function stTxt(c) { return [c.ok ? `${c.ok} vert${c.ok > 1 ? 's' : ''}` : '', c.warn ? `${c.warn} orange` : '', c.ko ? `${c.ko} rouge${c.ko > 1 ? 's' : ''}` : ''].filter(Boolean).join(', '); }
+
+/* =====================================================================
+   Moteur du démonstrateur
+   ===================================================================== */
+class Abort extends Error {}
+const S = {
+  sc: 'A', mode: 'guided', phase: 'intro', paused: false, fast: false, busy: false, runId: 0, beat: 0, scale: 1,
+  endShown: false, t0: new Date(), lock: { L: false, R: false }, curPos: { L: null, R: null }, L: null, R: null,
+};
+function freshSide() {
+  return { m: { steps: 0, clicks: 0, tools: 0, rekeys: 0, controls: 0, time: 0 }, anoms: [], anomStep: 0, anomWhere: '', anomNode: null, anomFlag: '',
+    anomSnap: null, stages: [], stepNo: {}, cur: null, toolsSet: new Set(), z: 10, wins: [], done: false };
+}
+function resetState() {
+  S.L = Object.assign(freshSide(), { zoom: 100, deskew: false, ctTyped: false, ctShown: false, fields: {}, bAmount: null, bSplit: null,
+    saved: false, ticks: new Set(), implicit: new Set(), replyWritten: false, replySent: false, trDest: null, trWritten: false, trSent: false });
+  S.R = Object.assign(freshSide(), { prepDone: false, ficheOpen: false, act: null, ctrls: [], decision: null, journal: [] });
+  S.beat = 0; S.busy = false; S.fast = false; S.endShown = false; S.lock.L = false; S.lock.R = false; S.curPos = { L: null, R: null }; S.snaps = [];
+  S.t0 = new Date();
+}
+
+/* ---------- Temps : pause, accélération, interruption ---------- */
+function sleep(ms) {
+  const id = S.runId;
+  return new Promise((resolve, reject) => {
+    let left = ms;
+    const tick = () => {
+      if (id !== S.runId) { reject(new Abort()); return; }
+      if (S.paused) { setTimeout(tick, 60); return; }
+      if (S.fast || left <= 0) { resolve(); return; }
+      const step = Math.min(30, left);
+      setTimeout(() => { left -= step; tick(); }, step);
+    };
+    tick();
+  });
+}
+async function typeInto(el, text) {
+  el.classList.add('typing'); el.classList.remove('na');
+  el.innerHTML = '<span class="val"></span><span class="caret"></span>';
+  const v = el.querySelector('.val');
+  const n = text.length, steps = Math.max(1, Math.min(n, 40)), chunk = Math.ceil(n / steps), delay = Math.max(12, Math.min(42, 560 / steps));
+  for (let i = chunk; i < n + chunk; i += chunk) { v.textContent = text.slice(0, Math.min(i, n)); if (S.fast) break; await sleep(delay); }
+  v.textContent = text;
+  const c = el.querySelector('.caret'); if (c) c.remove();
+  el.classList.remove('typing'); el.classList.add('filled');
+}
+
+/* ---------- Curseur, annotations, notifications ---------- */
+function relRect(side, el) {
+  const ws = $('#ws-' + side), s = S.scale || 1;
+  const wr = ws.getBoundingClientRect(), r = el.getBoundingClientRect();
+  return { x: (r.left - wr.left) / s, y: (r.top - wr.top) / s, w: r.width / s, h: r.height / s, W: ws.clientWidth, H: ws.clientHeight };
+}
+async function moveCursor(side, el) {
+  const cur = $('#cur-' + side); if (!cur || !el) return;
+  const r = relRect(side, el);
+  const x = r.x + Math.min(r.w * 0.5, 46), y = r.y + r.h * 0.55;
+  cur.classList.add('show');
+  cur.style.transform = `translate(${x}px, ${y}px)`;
+  S.curPos[side] = { x, y };
+  await sleep(430);
+}
+function ripple(side) {
+  const ws = $('#ws-' + side), p = S.curPos[side]; if (!ws || !p || S.fast) return;
+  const d = document.createElement('div'); d.className = 'ripple'; d.style.left = p.x + 'px'; d.style.top = p.y + 'px';
+  ws.appendChild(d); setTimeout(() => d.remove(), 600);
+}
+async function ensureVisible(el, margin = 10) {
+  if (!el) return;
+  const sp = el.closest('.win-b, .f-scroll, .jl'); if (!sp) return;
+  const s = S.scale || 1, r = el.getBoundingClientRect(), pr = sp.getBoundingClientRect();
+  let d = 0;
+  if (r.height > pr.height * 0.85 || r.top < pr.top + margin) d = (r.top - pr.top) / s - margin;
+  else if (r.bottom > pr.bottom - 6) d = (r.bottom - pr.bottom) / s + 12;
+  if (Math.abs(d) < 3) return;
+  sp.scrollTo({ top: sp.scrollTop + d, behavior: S.fast ? 'auto' : 'smooth' });
+  await sleep(S.fast ? 0 : 340);
+}
+function note(side, target, html, kind = '', place = 'below') {
+  const ws = $('#ws-' + side), el = typeof target === 'string' ? $(target) : target; if (!ws || !el) return null;
+  const n = document.createElement('div'); n.className = 'note ' + kind;
+  n.innerHTML = ic(kind === 'alert' ? 'alert' : kind === 'ai' ? 'spark' : 'bulb') + `<span>${html}</span><button class="pop-x" data-action="closeNote" title="Fermer" aria-label="Fermer">${ic('x')}</button>`;
+  ws.appendChild(n);
+  const r = relRect(side, el), nw = n.offsetWidth, nh = n.offsetHeight;
+  let x = r.x, y = place === 'above' ? r.y - nh - 8 : r.y + r.h + 8;
+  if (place === 'right') { x = r.x + r.w + 10; y = r.y - 4; }
+  if (place === 'left') { x = r.x - nw - 10; y = r.y - 4; }
+  x = Math.max(8, Math.min(x, r.W - nw - 8)); y = Math.max(8, Math.min(y, r.H - nh - 8));
+  n.style.left = x + 'px'; n.style.top = y + 'px';
+  return n;
+}
+function ring(side, target) {
+  const ws = $('#ws-' + side), el = typeof target === 'string' ? $(target) : target; if (!ws || !el) return;
+  const r = relRect(side, el), g = document.createElement('div'); g.className = 'ring';
+  Object.assign(g.style, { left: (r.x - 5) + 'px', top: (r.y - 4) + 'px', width: (r.w + 10) + 'px', height: (r.h + 8) + 'px' });
+  ws.appendChild(g);
+}
+function clearNotes() { $$('.note, .ring').forEach(n => n.remove()); }
+function toast(side, msg) {
+  const ws = $('#ws-' + side); if (!ws) return;
+  $$('.toast', ws).forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; ws.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+function clearSpots() { $$('.spot').forEach(e => e.classList.remove('spot')); $$('.spot-lbl').forEach(e => e.remove()); }
+async function spot(target, label) {
+  clearSpots();
+  const el = typeof target === 'string' ? $(target) : target; if (!el) return;
+  el.classList.add('spot');
+  if (label) { const l = document.createElement('span'); l.className = 'spot-lbl'; l.innerHTML = ic('spark') + esc(label) + `<button class="pop-x" data-action="closeSpot" title="Fermer" aria-label="Fermer">${ic('x')}</button>`; el.appendChild(l); }
+  await ensureVisible(el, 30);
+}
+
+/* Choix dans une liste (calcul ou interprétation laissés au Conseiller CRC) */
+let pendingChoice = null;
+function choose(side, anchor, title, options, autoIdx) {
+  return new Promise((resolve, reject) => {
+    const ws = $('#ws-' + side);
+    const box = document.createElement('div'); box.className = 'choice'; box.id = side + '-choice';
+    box.innerHTML = `<h6>${esc(title)}</h6>` + options.map((o, i) => `<button class="copt" data-choice="${i}" data-side="${side}">${esc(o)}</button>`).join('')
+      + (autoIdx == null ? `<button class="copt" data-choice="-1" data-side="${side}" style="font-weight:500;color:var(--muted)">Annuler</button>` : '');
+    ws.appendChild(box);
+    const r = relRect(side, anchor);
+    let x = r.x, y = r.y + r.h + 6;
+    x = Math.max(8, Math.min(x, r.W - box.offsetWidth - 8));
+    if (y + box.offsetHeight > r.H - 8) y = r.y - box.offsetHeight - 6;
+    box.style.left = x + 'px'; box.style.top = Math.max(8, y) + 'px';
+    const finish = i => { box.remove(); pendingChoice = null; resolve(i); };
+    if (autoIdx != null) {
+      (async () => {
+        try {
+          await sleep(650);
+          const opt = box.querySelectorAll('.copt')[autoIdx];
+          await moveCursor(side, opt); ripple(side); inc(side, 'clicks'); await sleep(220);
+          finish(autoIdx);
+        } catch (e) { box.remove(); pendingChoice = null; reject(e); }
+      })();
+    } else pendingChoice = { side, finish };
+  });
+}
+
+/* ---------- Compteurs ---------- */
+function renderCounters(pSide, pKey) {
+  ['steps', 'clicks', 'tools', 'rekeys'].forEach(k => {
+    const l = S.L.m[k], r = S.R.m[k], mx = Math.max(l, r, 1);
+    $('#v-L-' + k).textContent = l; $('#v-R-' + k).textContent = r;
+    $('#b-L-' + k).style.width = (100 * l / mx) + '%'; $('#b-R-' + k).style.width = (100 * r / mx) + '%';
+  });
+  { const l = S.L.m.time, r = S.R.m.time, mx = Math.max(l, r, 0.1);
+    $('#v-L-time').textContent = fmtMin(l); $('#v-R-time').textContent = fmtMin(r);
+    $('#b-L-time').style.width = (100 * l / mx) + '%'; $('#b-R-time').style.width = (100 * r / mx) + '%'; }
+  $('#v-L-controls').textContent = S.L.m.controls; $('#v-R-controls').textContent = S.R.m.controls;
+  ['L', 'R'].forEach(sd => {
+    const s = S[sd], n = $('#n-' + sd + '-anoms');
+    $('#v-' + sd + '-anoms').textContent = s.anoms.length;
+    if (!s.anoms.length) { n.textContent = '—'; n.className = 't-note'; }
+    else { n.textContent = `étape ${s.anomStep} · ${s.anomWhere}`; n.className = 't-note ' + (s.anoms.some(a => a.kind === 'ko') ? 'alert' : 'warn'); }
+  });
+  if (pSide && pKey) { const el = $('#v-' + pSide + '-' + pKey); if (el) { el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); } }
+}
+function inc(side, key, d = 1) { S[side].m[key] += d; renderCounters(side, key); }
+function setM(side, key, v) { if (S[side].m[key] === v) return; S[side].m[key] = v; renderCounters(side, key); }
+function toolOpened(side, id) { if (!S[side].toolsSet.has(id)) { S[side].toolsSet.add(id); inc(side, 'tools'); } }
+function addAnoms(side, list, where, node, flag) {
+  const s = S[side];
+  if (!s.anoms.length) { s.anomStep = s.m.steps; s.anomWhere = where; s.anomNode = node; s.anomFlag = flag; s.anomSnap = { clicks: s.m.clicks, tools: s.m.tools, rekeys: s.m.rekeys }; }
+  list.forEach(a => s.anoms.push(a));
+  renderCounters(side, 'anoms'); renderFrise(side);
+}
+
+/* ---------- Frise du chemin de la demande ---------- */
+const L_NODES = [
+  { id: 'msg', l: 'Message', ic: 'mail' }, { id: 'pj', l: 'Pièce jointe', ic: 'clip' }, { id: 'contrat', l: 'Contrat', ic: 'folder' },
+  { id: 'cata', l: 'Catalogue', ic: 'book' }, { id: 'saisie', l: 'Saisie de l’acte', ic: 'keyboard' }, { id: 'chk', l: 'Check-list', ic: 'checklist' },
+  { id: 'decision', l: 'Valider & répondre', lC: 'Escalader & répondre', lB: 'Demander une précision', ic: 'check' },
+];
+const R_NODES = [
+  { id: 'prep', l: 'Agent IA prépare', ai: true, ic: 'spark' }, { id: 'open', l: 'Ouvrir la fiche', ic: 'inbox' },
+  { id: 'verify', l: 'Vérifier', ic: 'eye' }, { id: 'decide', l: 'Décider', ic: 'check' }, { id: 'trace', l: 'Journal & réponse', ai: true, ic: 'log' },
+];
+function stage(side, id) {
+  const s = S[side];
+  if (s.stages.includes(id)) return false;
+  s.stages.push(id);
+  const node = (side === 'L' ? L_NODES : R_NODES).find(n => n.id === id);
+  if (node && !node.ai) { s.m.steps++; s.stepNo[id] = s.m.steps; renderCounters(side, 'steps'); }
+  const t = (DUR[S.sc][side] || {})[id] || 0;
+  if (t) { s.m.time += t; renderCounters(side, 'time'); }
+  renderFrise(side);
+  return true;
+}
+function renderFrise(side) {
+  const s = S[side], el = $('#frise-' + side); if (!el) return;
+  const nodes = side === 'L' ? L_NODES : R_NODES, isC = S.sc === 'C';
+  const skip = new Set();
+  if (side === 'L' && s.stages.includes('decision') && (isC || s.trSent || (S.sc === 'B' && !s.saved))) ['cata', 'saisie', 'chk'].forEach(x => { if (!s.stages.includes(x)) skip.add(x); });
+  let h = '<div class="fr-h">Chemin de<br>la demande</div><div class="fr-track">';
+  nodes.forEach((n, i) => {
+    const done = s.stages.includes(n.id), cls = ['fr-node'];
+    if (n.ai) cls.push('ai');
+    if (done) cls.push('done');
+    if (!done && s.cur === n.id) cls.push('cur');
+    if (skip.has(n.id)) cls.push('skip');
+    let al = '';
+    if (s.anoms.length && s.anomNode === n.id) {
+      const ko = s.anoms.some(a => a.kind === 'ko'); cls.push(ko ? 'alert' : 'warn');
+      al = `<span class="al ${ko ? '' : 'w'}">${esc(s.anomFlag)}</span>`;
+    }
+    const label = n.id === 'decision' && !s.saved ? (isC ? n.lC : S.sc === 'B' ? n.lB : n.l) : n.l;
+    const dot = done ? (n.ai ? ic('check') : s.stepNo[n.id]) : (n.ai ? ic(n.ic) : (side === 'L' ? i + 1 : i));
+    h += `<div class="${cls.join(' ')}"><div class="fr-dot">${dot}</div><div class="fr-lbl">${esc(label)}${al}</div></div>`;
+  });
+  el.innerHTML = h + '</div>';
+}
+function cap(side, step, text) {
+  const el = $('#cap-' + side); if (!el) return;
+  const key = step + '|' + text;
+  if (el.dataset.key === key) return;
+  el.dataset.key = key;
+  el.innerHTML = `<span class="cap-step">${esc(step)}</span><span class="cap-text flash-in">${text}</span>`;
+  el.classList.remove('attn'); void el.offsetWidth; el.classList.add('attn');
+}
+
+/* ---------- Construction des consoles (même structure, même style) ---------- */
+function buildConsole(side) {
+  const isL = side === 'L';
+  $('#console-' + side).innerHTML = `
+    <div class="c-head">
+      <div class="c-cap" id="cap-${side}"></div>
+    </div>
+    <div class="frise" id="frise-${side}"></div>
+    <div class="ws" id="ws-${side}">
+      <div class="apps" id="apps-${side}">${isL ? appsL() : appsR()}</div>
+      <div class="desk" id="desk-${side}">${inboxHTML(side)}</div>
+      <div class="taskbar" id="task-${side}"><span class="tb-lbl">Fenêtres</span><span class="tb-count" id="tbc-${side}">aucune ouverte</span></div>
+      <div class="cursor" id="cur-${side}">${CURSOR_SVG}</div>
+    </div>`;
+  renderFrise(side);
+}
+function appsL() {
+  return '<span class="apps-lbl">Applications</span>' + [['contrat', 'folder', 'Contrat'], ['cata', 'book', 'Catalogue des supports'], ['saisie', 'keyboard', 'Saisie de l’acte'], ['chk', 'checklist', 'Check-list contrôles']]
+    .map(([id, i, l]) => `<button class="app" id="L-app-${id}" data-l="app" data-app="${id}">${ic(i)}${l}</button>`).join('');
+}
+function appsR() {
+  return '<span class="apps-lbl">Consultés par l’Agent IA</span>' + [['contrat', 'folder', 'Contrat'], ['cata', 'book', 'Catalogue'], ['chk', 'checklist', '7 contrôles'], ['saisie', 'keyboard', 'Acte pré-rempli']]
+    .map(([id, i, l]) => `<span class="app ai" id="R-app-${id}">${ic(i)}${l}<span class="okmark">${ic('check')}</span></span>`).join('');
+}
+function PREP_TASKS() {
+  const sc = SC[S.sc];
+  return ['Lecture du message sécurisé', 'Analyse de la pièce jointe manuscrite', 'Consultation du contrat ' + sc.contract, 'Vérification des supports au catalogue', 'Exécution des 7 contrôles', !sc.prepared ? 'Acte non préparé : points bloquants' : S.sc === 'B' ? 'Acte pré-rempli, message de précision rédigé' : 'Pré-remplissage de l’acte'];
+}
+function inboxHTML(side) {
+  const sc = SC[S.sc], a = side.toLowerCase();
+  const rows = [{ ch: 'lock', chl: 'Message sécurisé – application', who: sc.sender, obj: 'Arbitrage', ct: sc.contract, ago: 0, target: true }, ...OTHER_ROWS];
+  const tr = rows.map(r => {
+    const time = fmtHM(new Date(S.t0.getTime() - r.ago * 60000));
+    const cells = `<td><span class="chan">${ic(r.ch)}${esc(r.chl)}</span></td><td>${esc(r.who)}</td><td>${esc(r.obj)}</td><td>${r.ct}</td><td>${time}</td>`;
+    if (r.target) {
+      const st = side === 'L' ? '<span class="st new">Nouveau</span>' : '<span class="st prep"><span class="spin"></span>Agent IA · en attente</span>';
+      return `<tr class="ib-row target" id="${side}-row-target" data-${a}="openReq">${cells}<td id="${side}-st-target">${st}</td></tr>`;
+    }
+    return `<tr class="ib-row" data-${a}="row">${cells}<td><span class="st">À traiter</span></td></tr>`;
+  }).join('');
+  const act = side === 'L'
+    ? `<div class="ib-act"><h5>${ic('user')}Préparation de la demande</h5><p>Aucune préparation : la demande arrive brute. Le Conseiller CRC va devoir, seul :</p><ul class="todo-list"><li>lire le message et la pièce jointe</li><li>consulter le contrat</li><li>vérifier les supports au catalogue</li><li>ressaisir l’acte champ par champ</li><li>cocher les contrôles de mémoire</li><li>valider, puis répondre au client</li></ul></div>`
+    : `<div class="ib-act ai"><h5>${ic('spark')}Agent IA · préparation en amont, dès réception</h5><ul class="prep-list" id="R-prep-list">${PREP_TASKS().map((t, i) => `<li data-i="${i}"><span class="pk">${ic('check')}</span>${esc(t)}</li>`).join('')}</ul></div>`;
+  return `<div class="inbox" id="${side}-inbox"><div class="ib-card"><div class="ib-h">${ic('inbox')}Corbeille du Conseiller CRC<span class="cnt">6 demandes</span><span class="sort">Les plus récentes d’abord</span></div>
+    <table class="ib-table"><colgroup><col style="width:27%"><col style="width:13%"><col style="width:14%"><col style="width:12%"><col style="width:8%"><col style="width:26%"></colgroup>
+    <thead><tr><th>Canal</th><th>Client</th><th>Objet</th><th>Contrat</th><th>Reçue</th><th>Statut</th></tr></thead><tbody>${tr}</tbody></table></div>${act}</div>`;
+}
+
+/* ---------- Fenêtres de la console actuelle ---------- */
+function openWin(side, id, def) {
+  const s = S[side], desk = $('#desk-' + side);
+  let w = $('#' + side + '-win-' + id);
+  if (!w) {
+    const i = Math.min(s.wins.length, 5), W = desk.clientWidth, H = desk.clientHeight;
+    w = document.createElement('div'); w.className = 'win'; w.id = side + '-win-' + id;
+    Object.assign(w.style, { left: (10 + i * 18) + 'px', top: (8 + i * 15) + 'px', width: (W - 20 - 5 * 18) + 'px', height: (H - 16 - 5 * 15) + 'px' });
+    w.innerHTML = `<div class="win-t">${ic(def.icon)}<span>${esc(def.title)}</span><span class="sub">${esc(def.sub || '')}</span><button class="win-x" data-${side.toLowerCase()}="closeWin" data-w="${id}" title="Fermer" aria-label="Fermer">${ic('x')}</button></div><div class="win-b" id="${side}-wb-${id}">${def.body}</div>`;
+    desk.appendChild(w); s.wins.push(id); addTask(side, id, def.icon, def.short);
+  }
+  front(side, id);
+  return w;
+}
+function front(side, id) {
+  const s = S[side], w = $('#' + side + '-win-' + id); if (!w) return;
+  s.z += 1; w.style.zIndex = s.z;
+  $$('.win, .fiche', $('#desk-' + side)).forEach(x => x.classList.toggle('front', x === w));
+  $$('.task', $('#task-' + side)).forEach(t => t.classList.toggle('on', t.dataset.w === id));
+}
+function addTask(side, id, icon, label) {
+  const b = document.createElement('button'); b.className = 'task'; b.id = side + '-task-' + id; b.dataset.w = id;
+  b.setAttribute('data-' + side.toLowerCase(), 'task'); b.innerHTML = ic(icon) + esc(label);
+  $('#task-' + side).insertBefore(b, $('#tbc-' + side)); updateTb(side);
+}
+function updateTb(side) { const n = S[side].wins.length; $('#tbc-' + side).textContent = n ? `${n} ouverte${n > 1 ? 's' : ''}` : 'aucune ouverte'; }
+function closeWinEl(side, id) {
+  const w = $('#' + side + '-win-' + id); if (w) w.remove();
+  const t = $('#' + side + '-task-' + id); if (t) t.remove();
+  S[side].wins = S[side].wins.filter(x => x !== id); updateTb(side);
+  const last = S[side].wins[S[side].wins.length - 1]; if (last) front(side, last);
+}
+function defL(id) {
+  const sc = SC[S.sc];
+  return {
+    msg: { icon: 'mail', title: 'Message sécurisé reçu', sub: '· ' + sc.sender, short: 'Message', body: bodyMsg() },
+    pj: { icon: 'clip', title: 'Visionneuse', sub: '· ' + sc.pj, short: 'Pièce jointe', body: bodyPJ() },
+    contrat: { icon: 'folder', title: 'Contrat', sub: '· consultation', short: 'Contrat', body: bodyContrat() },
+    cata: { icon: 'book', title: 'Catalogue des supports', sub: '· contrat multisupport Vie', short: 'Catalogue', body: bodyCata() },
+    saisie: { icon: 'keyboard', title: 'Saisie de l’acte', sub: '· nouvel acte : arbitrage', short: 'Saisie', body: bodySaisie() },
+    chk: { icon: 'checklist', title: 'Check-list des contrôles', sub: '· arbitrage', short: 'Check-list', body: bodyChk() },
+  }[id];
+}
+function msgPlain(sc) { return esc(sc.msg.replace(/\[\[k\w+\|([^\]]+)\]\]/g, '$1')); }
+function msgMarked(sc) {
+  let out = '', last = 0, m; const re = /\[\[(k\w+)\|([^\]]+)\]\]/g;
+  while ((m = re.exec(sc.msg))) { out += esc(sc.msg.slice(last, m.index)) + `<mark class="x" data-k="${m[1]}" data-r="src">${esc(m[2])}</mark>`; last = re.lastIndex; }
+  return out + esc(sc.msg.slice(last));
+}
+function bodyMsg() {
+  const sc = SC[S.sc];
+  return `<div class="meta">
+      <span class="k">Canal d’origine</span><span class="chip-chan">${ic('lock')}Message sécurisé – application</span>
+      <span class="k">De</span><span><b>${esc(sc.sender)}</b> <span class="muted">(${esc(sc.senderSpace)})</span></span>
+      <span class="k">Reçu</span><span>aujourd’hui à ${fmtHM(S.t0)}</span>
+      <span class="k">Objet</span><span>Arbitrage</span></div>
+    <div class="msg-text" id="L-msg-text">${msgPlain(sc)}</div>
+    <div class="pj-line">${ic('clip')}<b>${esc(sc.pj)}</b><span class="muted">1 page · 412 Ko</span><button class="lnk" id="L-pj-link" data-l="openPJ">Ouvrir la pièce jointe</button></div>
+    <div class="msg-actions">
+      <button class="btn sm" id="L-btn-reply" data-l="reply">${ic('reply')}Répondre</button>
+      <button class="btn sm" id="L-btn-transfer" data-l="transfer">${ic('fwd')}Transférer</button>
+      <button class="btn sm" id="L-btn-close" data-l="close">${ic('check')}${S.sc === 'B' ? 'Mettre en attente client' : 'Clôturer la demande'}</button>
+    </div>
+    <div class="compose" id="L-reply" hidden>
+      <h6>${ic('reply')}Réponse à ${esc(sc.sender)} · messagerie sécurisée</h6>
+      <button class="inp area" id="L-reply-body" data-l="replyWrite"><span class="ph">Cliquez pour rédiger la réponse…</span></button>
+      <div><button class="btn sm" id="L-reply-send" data-l="replySend">${ic('send')}Envoyer</button></div>
+    </div>
+    <div class="compose" id="L-transfer" hidden>
+      <h6>${ic('fwd')}Transférer la demande à un autre service</h6>
+      <div class="fgrid">
+        <div class="fld"><label>Destinataire</label><button class="inp" id="L-tr-dest" data-l="trDest"><span class="ph">Choisir un service…</span></button></div>
+        <div class="fld full"><label>Note de transfert</label><button class="inp area" id="L-tr-note" data-l="trWrite"><span class="ph">Cliquez pour rédiger la note…</span></button></div>
+      </div>
+      <div><button class="btn sm" id="L-tr-send" data-l="trSend">${ic('send')}Envoyer le transfert</button></div>
+    </div>`;
+}
+function scanHTML(side) {
+  const sc = SC[S.sc], f = sc.form, R = side === 'R';
+  const row = (k, inner) => `<div class="scan-row${R && k ? ' xk' : ''}"${k ? ` data-k="${k}"` : ''}${R && k ? ' data-r="src"' : ''}>${inner}</div>`;
+  let inv = f.inv.map((x, i) => row(x[2], `<span class="scan-lbl">${i + 1}) Support :</span><span class="line"><span class="hand">${esc(x[0])}</span></span><span class="scan-lbl">Montant :</span><span class="line sm"><span class="hand">${esc(x[1])}</span></span>`)).join('');
+  if (f.inv.length < 2) inv += row('', '<span class="scan-lbl">2) Support :</span><span class="line"></span><span class="scan-lbl">Montant :</span><span class="line sm"></span>');
+  return `<div class="scan">
+    <div class="scan-head"><div><div class="scan-title">DEMANDE D’ARBITRAGE</div><div class="scan-sub">Contrat d’assurance vie multisupport · à retourner signé</div></div><div class="scan-logo">ASSUREUR VIE<br>Service clients</div></div>
+    ${row('k1', `<span class="scan-lbl">N° de contrat :</span><span class="line"><span class="hand big">${esc(f.contrat)}</span></span>`)}
+    ${row(sc.id === 'C' ? 'kS' : '', `<span class="scan-lbl">Souscripteur · Nom :</span><span class="line"><span class="hand">${esc(f.nom)}</span></span><span class="scan-lbl">Prénom :</span><span class="line sm"><span class="hand">${esc(f.prenom)}</span></span>`)}
+    <div class="scan-sec">1. Support à désinvestir</div>
+    ${row('k2', `<span class="scan-lbl">Support :</span><span class="line"><span class="hand">${esc(f.desinv)}</span></span><span class="scan-lbl">Montant :</span><span class="line sm"><span class="hand">${esc(f.montant)}</span></span>`)}
+    <div class="scan-sec">2. Support(s) à investir</div>
+    ${inv}
+    ${row('k6', '<span class="cbox">X</span><span class="scan-lbl">Je reconnais avoir reçu le document d’information clé (DIC) de chaque support choisi.</span>')}
+    ${row('', `<span class="scan-lbl">Fait à</span><span class="line sm"><span class="hand">${esc(f.lieu)}</span></span><span class="scan-lbl">le</span><span class="line sm"><span class="hand">${SIGN_DATE}</span></span>`)}
+    ${row('k5', `<span class="scan-lbl">Signature du souscripteur :</span><span class="sig">${esc(f.sign)}</span>${f.signNote ? `<span class="sig-note">${esc(f.signNote)}</span>` : ''}`)}
+    <div class="scan-foot">Formulaire ARB-01 · Une demande incomplète ou non signée par le souscripteur ne peut pas être traitée.</div>
+  </div>`;
+}
+function bodyPJ() {
+  return `<div class="viewer-bar">
+      <button class="vbtn" id="L-zoom-out" data-l="zoom" data-d="-1" title="Zoom arrière">${ic('zout')}</button>
+      <span class="zoomv" id="L-zoom-v">100 %</span>
+      <button class="vbtn" id="L-zoom-in" data-l="zoom" data-d="1" title="Zoom avant">${ic('zin')}</button>
+      <button class="vbtn" id="L-rot" data-l="rotate" title="Redresser">${ic('level')}</button>
+      <span class="muted" style="margin-left:auto">Page 1 / 1 · document numérisé</span></div>
+    <div class="viewer-area"><div class="scan-wrap" id="L-scan-wrap">${scanHTML('L')}</div></div>`;
+}
+function bodyContrat() {
+  return `<div class="search-bar"><div class="fld"><label>N° de contrat</label><button class="inp" id="L-ct-field" data-l="ctField"><span class="ph">AV-______</span></button></div>
+      <button class="btn sm" id="L-ct-search" data-l="ctSearch">${ic('zin')}Rechercher</button><span class="muted" style="margin-left:auto">Base contrats Vie</span></div>
+    <div id="L-ct-result"><div class="empty-state">Saisissez un numéro de contrat, puis lancez la recherche.</div></div>`;
+}
+function contratResultHTML() {
+  const sc = SC[S.sc], c = CONTRACTS[sc.contract];
+  const total = Object.values(c.hold).reduce((a, b) => a + b, 0);
+  const rows = SUPPORTS.map(x => { const v = c.hold[x.s] || 0; return `<tr><td>${esc(x.s)}</td><td class="r">${eur(v)}</td><td class="r">${v ? pct(v / total) : '—'}</td><td>${x.open ? '<span class="pill open">Ouvert</span>' : '<span class="pill closed">Fermé à l’arbitrage</span>'}</td></tr>`; }).join('');
+  return `<div class="ct-grid">
+      <div class="ct-box"><h5>Identification</h5><dl class="dl"><dt>N° de contrat</dt><dd>${c.num}</dd><dt>Produit</dt><dd>${c.product}</dd><dt>Titulaire</dt><dd id="L-ct-holder">${esc(c.holder)}</dd><dt>Date d’effet</dt><dd>${c.effet}</dd><dt>Statut</dt><dd>En cours</dd></dl></div>
+      <div class="ct-box"><h5>Intervenants et blocages</h5><dl class="dl"><dt>Procuration / mandat</dt><dd id="L-ct-proc">${c.procuration}</dd><dt>Nantissement</dt><dd id="L-ct-nanti">${esc(c.nantiTxt)}</dd><dt>Opposition</dt><dd>${c.opposition}</dd><dt>Arbitrages ${YEAR}</dt><dd>${c.arb}</dd><dt>Dernier acte</dt><dd>${esc(c.lastAct)}</dd></dl></div>
+      <div class="ct-box wide"><h5>Situation au ${fmtD(NOW)} · répartition par support</h5><table class="tbl"><thead><tr><th>Support</th><th class="r">Encours</th><th class="r">Part</th><th>Arbitrage</th></tr></thead><tbody>${rows}<tr><td><b>Total</b></td><td class="r"><b>${eur(total)}</b></td><td class="r">100 %</td><td></td></tr></tbody></table></div>
+    </div>`;
+}
+function bodyCata() {
+  const rows = SUPPORTS.map((x, i) => `<tr class="cat-row" id="L-cat-${i}" data-l="cataRow" data-i="${i}"><td><b>${esc(x.s)}</b></td><td>${esc(x.type)}</td><td>${x.open ? '<span class="pill open">Ouvert</span>' : '<span class="pill closed">Fermé à l’arbitrage</span>'}</td><td>${ic('chevron')}</td></tr>
+      <tr class="cat-det" id="L-catd-${i}" hidden><td colspan="4">${cataDetail(x, i)}</td></tr>`).join('');
+  return `<div class="cat-rules"><b>Règles d’arbitrage</b> · minimum <b>1 000 € par support</b> · date de valeur <b>J+2 jours ouvrés</b> · frais : <b>0 € pour le 1er arbitrage de l’année</b>, puis selon les conditions du contrat.</div>
+    <table class="tbl"><thead><tr><th>Support</th><th>Type</th><th>Statut</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function cataDetail(x, i) {
+  if (x.s === 'Fonds euros') return 'Support en euros. Désinvestissement possible à tout moment par arbitrage.';
+  return `${x.open ? 'Ouvert aux arbitrages entrants et sortants.' : 'Fermé aux arbitrages entrants.'} Minimum : 1 000 € par support. Risque de perte en capital.
+    <div class="dic">${ic('doc')}<span>Document d’information clé (DIC) « ${esc(x.s)} » · version 01/${YEAR}</span><button class="lnk" data-l="cataDic" data-i="${i}">Consulter</button></div>`;
+}
+function bodySaisie() {
+  const f = FIELDS.map(x => `<div class="fld${x.full ? ' full' : ''}"><label>${esc(x.l)}</label><button class="inp" id="L-f-${x.id}" data-l="field" data-f="${x.id}"><span class="ph">—</span></button></div>`).join('');
+  return `<div class="act-bar"><span class="pill">Type d’acte : arbitrage</span><span>Formulaire vide · chaque champ est à saisir</span></div>
+    <div class="fgrid">${f}</div>
+    <div id="L-saisie-msg"></div>
+    <div class="form-actions"><button class="btn sm" id="L-saisie-save" data-l="save">${ic('check')}Enregistrer l’acte</button></div>`;
+}
+function bodyChk() {
+  return `<div class="chk-prog" id="L-chk-prog">0 / 7 cochés</div><div class="chk-list">${CHECKS.map(([id, l]) => `<button class="chk-item" id="L-chk-${id}" data-l="chk" data-c="${id}"><span class="chk-box">${ic('check')}</span>${esc(l)}</button>`).join('')}</div>
+    <div class="form-note">Contrôles déclaratifs : le Conseiller CRC coche selon ce qu’il a vu dans les autres outils.</div>`;
+}
+
+/* Valeurs ressaisies à gauche (dans B, elles dépendent des choix de l’agent) */
+function leftValue(fid) {
+  const sc = SC[S.sc], L = S.L;
+  const base = { contrat: sc.contract, dSup: 'Fonds euros', date: VALUE_DATE, frais: '0 €' };
+  if (fid in base) return base[fid];
+  if (S.sc !== 'B') {
+    const t = sc.req.to;
+    return { dMnt: eur(sc.req.amount), i1Sup: t[0][0], i1Mnt: eur(t[0][1]), i2Sup: t[1] ? t[1][0] : null, i2Mnt: t[1] ? eur(t[1][1]) : null }[fid];
+  }
+  const amt = L.bAmount, sp = L.bSplit;
+  if (fid === 'dMnt') return eur(amt);
+  if (fid === 'i1Sup') return sp === 'r3' ? 'Actions Europe' : 'Actions Monde';
+  if (fid === 'i1Mnt') return eur(sp === 'r2' ? amt / 2 : amt);
+  if (fid === 'i2Sup') return sp === 'r2' ? 'Actions Europe' : null;
+  if (fid === 'i2Mnt') return sp === 'r2' ? eur(amt / 2) : null;
+  return null;
+}
+function setNA(fid) { const el = $('#L-f-' + fid); if (!el) return; el.classList.add('na', 'filled'); el.innerHTML = 'Sans objet'; S.L.fields[fid] = '—'; }
+function leftTargetsText() {
+  const F = S.L.fields, parts = [];
+  [['i1Sup', 'i1Mnt'], ['i2Sup', 'i2Mnt']].forEach(([s, m]) => { if (F[s] && F[s] !== '—') parts.push(`${F[s]} (${F[m] && F[m] !== '—' ? F[m] : '…'})`); });
+  if (parts.length) return joinFr(parts);
+  return S.sc === 'A' ? `Actions Monde (${eur(10000)}) et Obligations Euro (${eur(5000)})` : 'les supports actions';
+}
+function replyText() {
+  if (S.sc === 'B' && !S.L.saved) return `Bonjour Madame Martin, vous souhaitez arbitrer la moitié de votre fonds euros, soit ${eur(24000)}, vers nos supports actions. Deux supports sont ouverts : Actions Monde et Actions Europe. Merci de nous indiquer la répartition souhaitée (minimum 1 000 € par support). Bien cordialement.`;
+  if (S.sc === 'C') return 'Bonjour Madame, seul le titulaire du contrat AV-000456, ou une personne disposant d’un pouvoir, peut demander un arbitrage. Votre demande est transmise au service compétent. Bien cordialement.';
+  const dm = S.L.fields.dMnt && S.L.fields.dMnt !== '—' ? S.L.fields.dMnt : (S.sc === 'A' ? eur(15000) : eur(24000));
+  return `Bonjour Madame Martin, nous vous confirmons la prise en compte de votre arbitrage de ${dm} du fonds euros vers ${leftTargetsText()}, avec une date de valeur au ${VALUE_DATE}. Bien cordialement.`;
+}
+function transferText() {
+  if (S.sc === 'C') return 'Arbitrage demandé sur AV-000456 (titulaire : Jean Durand) par Sophie Durand, sa fille, sans procuration. Contrat nanti au profit de Banque Alpha. Merci de prendre la main.';
+  return 'Demande d’arbitrage de Claire Martin sur AV-000123 : merci de votre avis avant validation.';
+}
+function updateLeftControls() {
+  const set = new Set([...S.L.ticks, ...S.L.implicit]);
+  setM('L', 'controls', set.size);
+  const p = $('#L-chk-prog'); if (p) p.textContent = S.L.ticks.size + ' / 7 cochés';
+}
+
+/* ---------- Actions de la console actuelle (gauche) ---------- */
+const HL = {
+  async row() { toast('L', 'Pour la démonstration, ouvrez la demande d’arbitrage (ligne surlignée).'); },
+  async openReq(el) {
+    openWin('L', 'msg', defL('msg')); toolOpened('L', 'msg');
+    el.classList.add('opened'); el.classList.remove('pulse');
+    const st = $('#L-st-target'); if (st && !S.L.done) st.innerHTML = '<span class="st wait">En cours</span>';
+    if (stage('L', 'msg') && S.sc === 'B') addAnoms('L', [{ kind: 'warn', label: 'Ambiguïté' }], 'message', 'msg', 'ambiguïté · étape ' + S.L.m.steps);
+  },
+  async openPJ() { openWin('L', 'pj', defL('pj')); toolOpened('L', 'pj'); stage('L', 'pj'); },
+  async zoom(el) {
+    S.L.zoom = Math.max(80, Math.min(160, S.L.zoom + 20 * (+el.dataset.d)));
+    const w = $('#L-scan-wrap'); if (w) w.style.zoom = S.L.zoom / 100;
+    const v = $('#L-zoom-v'); if (v) v.textContent = S.L.zoom + ' %';
+  },
+  async rotate() { S.L.deskew = !S.L.deskew; const sc = $('#L-scan-wrap .scan'); if (sc) sc.style.transform = S.L.deskew ? 'none' : ''; },
+  async app(el) { const id = el.dataset.app; openWin('L', id, defL(id)); toolOpened('L', id); stage('L', id); el.classList.add('on'); },
+  async task(el) { front('L', el.dataset.w); },
+  async closeWin(el) { closeWinEl('L', el.dataset.w); },
+  async ctField(el) { if (S.L.ctTyped) return; await typeInto(el, SC[S.sc].contract); S.L.ctTyped = true; inc('L', 'rekeys'); },
+  async ctSearch() {
+    if (!S.L.ctTyped) { toast('L', 'Saisissez d’abord le numéro de contrat.'); return; }
+    if (S.L.ctShown) return;
+    $('#L-ct-result').innerHTML = '<div class="empty-state"><span class="spin"></span> Recherche en cours…</div>';
+    await sleep(380);
+    $('#L-ct-result').innerHTML = contratResultHTML();
+    S.L.ctShown = true;
+    if (S.sc === 'C') {
+      S.L.implicit = new Set(['blocage', 'demandeur']); updateLeftControls();
+      addAnoms('L', [{ kind: 'ko', label: 'Contrat nanti' }, { kind: 'ko', label: 'Demandeuse sans pouvoir' }], 'outil Contrat', 'contrat', 'blocage · étape ' + S.L.m.steps);
+    }
+  },
+  async cataRow(el) { const d = $('#L-catd-' + el.dataset.i); if (d) d.hidden = !d.hidden; },
+  async cataDic() { toast('L', 'DIC consulté.'); },
+  async field(el) {
+    const fid = el.dataset.f, L = S.L;
+    if (L.fields[fid]) { toast('L', L.fields[fid] === '—' ? 'Champ sans objet.' : 'Champ déjà saisi.'); return; }
+    if (S.sc === 'B') {
+      const needAmt = ['dMnt', 'i1Mnt', 'i2Mnt'].includes(fid), needSplit = /^i\d/.test(fid);
+      if (needAmt && L.bAmount == null) {
+        const o = await choose('L', el, '« La moitié de mon fonds euros » : quel montant saisir ?', [eur(12000), eur(24000), eur(48000)], S.mode === 'guided' ? 1 : null);
+        if (o < 0) return;
+        L.bAmount = [12000, 24000, 48000][o];
+      }
+      if (needSplit && L.bSplit == null) {
+        const o = await choose('L', el, '« Vos supports actions » : quelle répartition retenir ?', ['Tout sur Actions Monde', 'Moitié Actions Monde, moitié Actions Europe', 'Tout sur Actions Europe'], S.mode === 'guided' ? 1 : null);
+        if (o < 0) return;
+        L.bSplit = ['r1', 'r2', 'r3'][o];
+        if (L.bSplit !== 'r2') { setNA('i2Sup'); setNA('i2Mnt'); }
+        if (L.fields[fid]) return;
+      }
+    }
+    const v = leftValue(fid);
+    if (v == null) { setNA(fid); return; }
+    await typeInto(el, v);
+    L.fields[fid] = v; inc('L', 'rekeys');
+  },
+  async save() {
+    const missing = FIELDS.filter(f => !S.L.fields[f.id]);
+    const box = $('#L-saisie-msg');
+    if (missing.length) { box.innerHTML = `<div class="form-err">Champs obligatoires non renseignés : ${esc(missing.map(m => m.l.toLowerCase()).join(', '))}.</div>`; return; }
+    if (S.L.saved || $('#L-dlg')) return;
+    box.innerHTML = '';
+    const d = document.createElement('div'); d.className = 'dlg'; d.id = 'L-dlg';
+    d.innerHTML = `<div class="dlg-box"><h6>Enregistrer l’acte d’arbitrage ?</h6><p class="muted" style="margin:0 0 10px">L’acte sera transmis en gestion pour exécution.</p><div class="form-actions" style="margin:0"><button class="btn sm primary" id="L-dlg-ok" data-l="saveOk">${ic('check')}Confirmer</button><button class="btn sm" id="L-dlg-cancel" data-l="saveCancel">Annuler</button></div></div>`;
+    $('#L-win-saisie').appendChild(d);
+  },
+  async saveOk() {
+    const d = $('#L-dlg'); if (d) d.remove();
+    S.L.saved = true;
+    $('#L-saisie-msg').innerHTML = `<div class="form-ok">${ic('check')}Acte n° ARB-${YEAR}-004512 enregistré et transmis en gestion.</div>`;
+    const b = $('#L-saisie-save'); if (b) b.disabled = true;
+    stage('L', 'decision');
+  },
+  async saveCancel() { const d = $('#L-dlg'); if (d) d.remove(); },
+  async chk(el) {
+    const id = el.dataset.c;
+    if (S.L.ticks.has(id)) { S.L.ticks.delete(id); el.classList.remove('on'); } else { S.L.ticks.add(id); el.classList.add('on'); }
+    updateLeftControls();
+  },
+  async reply() { $('#L-reply').hidden = false; $('#L-transfer').hidden = true; await ensureVisible($('#L-reply-send')); },
+  async replyWrite(el) { if (S.L.replyWritten) return; await typeInto(el, replyText()); S.L.replyWritten = true; inc('L', 'rekeys', S.sc === 'C' ? 1 : 3); },
+  async replySend() {
+    if (!S.L.replyWritten) { toast('L', 'Rédigez d’abord la réponse.'); return; }
+    if (S.L.replySent) return;
+    S.L.replySent = true;
+    const b = $('#L-reply-send'); if (b) b.outerHTML = `<span class="sent">${ic('check')}Réponse envoyée</span>`;
+    stage('L', 'decision');
+  },
+  async transfer() { $('#L-transfer').hidden = false; $('#L-reply').hidden = true; await ensureVisible($('#L-tr-send')); },
+  async trDest(el) {
+    if (S.L.trDest) return;
+    const opts = ['Service Juridique & Nantissements', 'Back-office Vie', 'Superviseur CRC'];
+    const o = await choose('L', el, 'Transférer à quel service ?', opts, S.mode === 'guided' ? 0 : null);
+    if (o < 0) return;
+    S.L.trDest = opts[o]; el.classList.add('filled'); el.innerHTML = esc(S.L.trDest);
+  },
+  async trWrite(el) { if (S.L.trWritten) return; await typeInto(el, transferText()); S.L.trWritten = true; inc('L', 'rekeys', S.sc === 'C' ? 4 : 2); },
+  async trSend() {
+    if (!S.L.trDest || !S.L.trWritten) { toast('L', 'Choisissez un destinataire et rédigez la note.'); return; }
+    if (S.L.trSent) return;
+    S.L.trSent = true;
+    const b = $('#L-tr-send'); if (b) b.outerHTML = `<span class="sent">${ic('check')}Transfert envoyé : ${esc(S.L.trDest)}</span>`;
+    stage('L', 'decision');
+  },
+  async close() {
+    if (S.L.done) return;
+    S.L.done = true;
+    const wait = S.sc === 'B' && !S.L.saved;
+    const st = $('#L-st-target'); if (st) st.innerHTML = wait ? '<span class="st wait">En attente client</span>' : '<span class="st done">Clôturée</span>';
+    const b = $('#L-btn-close'); if (b) { b.disabled = true; b.innerHTML = ic('check') + (wait ? 'Demande en attente' : 'Demande clôturée'); }
+  },
+};
+
+/* ---------- Fiche de décision (console cible, droite) ---------- */
+function openFiche() {
+  const sc = SC[S.sc], desk = $('#desk-R');
+  S.R.ficheOpen = true;
+  S.R.act = sc.prepared ? { amount: sc.req.amount, to: sc.req.to ? sc.req.to.map(x => x.slice()) : null } : null;
+  S.R.ctrls = evalControls(sc, S.R.act || sc.req);
+  const f = document.createElement('div'); f.className = 'fiche'; f.id = 'R-win-fiche';
+  f.innerHTML = ficheHTML();
+  desk.appendChild(f); S.R.wins.push('fiche'); addTask('R', 'fiche', 'spark', 'Fiche de décision');
+  front('R', 'fiche');
+  renderPrep(); renderDecision(); fitSticky();
+}
+/* La colonne « Demande reçue » reste visible quand on fait défiler la fiche */
+function fitSticky() {
+  const fs = $('#R-fscroll'), col = $('#R-fscroll .f-col'); if (!fs || !col) return;
+  col.style.top = Math.min(0, fs.clientHeight - col.offsetHeight - 8) + 'px';
+}
+function ficheHTML() {
+  const sc = SC[S.sc];
+  return `<div class="f-main" id="R-fmain"><div class="f-scroll" id="R-fscroll">
+    <div class="f-head"><span class="badge-ai">${ic('spark')}Préparée par l’Agent IA</span><span class="f-status" id="R-fstatus"></span><span class="f-ref">Arbitrage · ${esc(sc.sender)} · ${sc.contract}</span></div>
+    <div class="f-cols">
+      <div class="f-col">
+        <section class="f-sec" id="R-sec-demande">
+          <h4><span class="num">1</span>Demande reçue <span class="chip-chan" style="margin-left:auto;font-size:10.5px;padding:1px 6px">${ic('lock')}Message sécurisé – application</span></h4>
+          <div class="f-msg" id="R-msg">${msgMarked(sc)}</div>
+          <div class="f-pj"><div class="f-pj-h">${ic('clip')}${esc(sc.pj)}</div><div class="f-pj-view">${scanHTML('R')}</div></div>
+          <div class="f-sub" style="margin-top:8px">${ic('target')}Éléments extraits · cliquez pour voir la source</div>
+          <div class="xchips" id="R-chips">${sc.chips.map(c => `<button class="xchip ${c.cls || ''}" data-r="src" data-k="${c.k}"><span>${esc(c.l)}</span><b>${esc(c.v)}</b>${c.n ? `<em>${esc(c.n)}</em>` : ''}</button>`).join('')}</div>
+        </section>
+      </div>
+      <div class="f-col">
+        <section class="f-sec" id="R-sec-prep">
+          <h4><span class="num">2</span>Ce que l’Agent IA a préparé</h4>
+          <div class="f-sub">Résumé en 5 lignes</div>
+          <ol class="f-sum" id="R-sum"></ol>
+          <div class="f-sub" style="margin-top:8px">Carte contrat</div>
+          <div id="R-contract">${contractCard()}</div>
+          <div class="f-sub" style="margin-top:8px">7 contrôles · feu et raison</div>
+          <div class="ctl-list blk" id="R-controls"></div>
+          <div class="f-sub" style="margin-top:8px">Acte d’arbitrage · répartition avant / après</div>
+          <div class="blk" id="R-act"></div>
+        </section>
+      </div>
+    </div>
+  </div></div>
+  <section class="f-decision" id="R-decision"></section>`;
+}
+function contractCard() {
+  const sc = SC[S.sc], c = CONTRACTS[sc.contract];
+  const total = Object.values(c.hold).reduce((a, b) => a + b, 0);
+  return `<div class="f-card blk" id="R-card">
+    <div><span class="k">Titulaire</span><b data-k="kH">${esc(c.holder)}</b></div>
+    <div><span class="k">Fonds euros</span><b data-k="kB">${eur(c.hold['Fonds euros'])}</b></div>
+    <div><span class="k">Procuration</span><span data-k="kP" class="${sc.holderSender ? '' : 'bad'}">${c.procuration}</span></div>
+    <div><span class="k">Nantissement</span><span data-k="kN" class="${c.nanti ? 'bad' : ''}">${c.nanti ? 'Oui · Banque Alpha' : 'Aucun'}</span></div>
+    <div><span class="k">Contrat</span><span data-k="k1">${c.num}</span> · en cours</div>
+    <div><span class="k">Encours total</span>${eur(total)}</div>
+    <div><span class="k">Arbitrages ${YEAR}</span>${c.arb} · frais 0 €</div>
+    <div><span class="k">Support fermé</span>Immobilier Europe</div>
+  </div>`;
+}
+function renderPrep() {
+  const sc = SC[S.sc], R = S.R;
+  $('#R-sum').innerHTML = sc.summary(R).map(t => `<li>${esc(t)}</li>`).join('');
+  $('#R-controls').innerHTML = R.ctrls.map(c => `<button class="ctl ${c.st}" data-r="src" data-k="${c.k.join(' ')}" data-c="${c.id}" title="${esc(c.tip)}"><span class="light ${c.st}"></span><b>${esc(c.n)}</b><span class="why">${esc(c.why)}</span></button>`).join('');
+  $('#R-act').innerHTML = actHTML();
+  const cnt = countSt(R.ctrls), fs = $('#R-fstatus');
+  if (cnt.ko) { fs.className = 'f-status ko'; fs.innerHTML = ic('alert') + `${cnt.ko} point${cnt.ko > 1 ? 's' : ''} bloquant${cnt.ko > 1 ? 's' : ''} · ${sc.prepared ? 'acte à corriger' : 'acte non préparé'}`; }
+  else if (cnt.warn) { fs.className = 'f-status warn'; fs.innerHTML = ic('alert') + (S.sc === 'B' ? `Ordre incomplet · ${cnt.warn} points à préciser` : `${cnt.warn} point${cnt.warn > 1 ? 's' : ''} à faire préciser · ${cnt.ok} contrôles sur 7 au vert`); }
+  else { fs.className = 'f-status ok'; fs.innerHTML = ic('check') + '7 contrôles sur 7 au vert'; }
+}
+function actHTML() {
+  const sc = SC[S.sc], c = CONTRACTS[sc.contract], R = S.R;
+  if (!sc.prepared) return `<div class="blocked">${ic('alert')}<div><b>Acte non préparé.</b> L’Agent IA ne prépare pas d’acte tant que 2 points bloquants ne sont pas levés : le pouvoir de la demandeuse et l’accord du créancier nanti.</div></div>`;
+  let readings = '';
+  if (S.sc === 'B') {
+    readings = `<div class="readings" id="R-readings"><div class="rh">« La moitié » = ${eur(24000)} (50 % de ${eur(48000)}) · « vos supports actions » : répartition non précisée. Options possibles, à faire choisir par la cliente :</div>${sc.readings.map(r => `<div class="rdo">${ic('chevron')}${esc(r.label)}</div>`).join('')}<div class="rf">${ic('spark')}Options reprises dans la demande de précision pré-rédigée.</div></div>`;
+  }
+  const act = R.act, before = Object.assign({}, c.hold), after = Object.assign({}, c.hold);
+  const total = Object.values(before).reduce((a, b) => a + b, 0);
+  let rows;
+  if (act && act.to) {
+    after['Fonds euros'] = (after['Fonds euros'] || 0) - act.amount;
+    act.to.forEach(([s, v]) => { after[s] = (after[s] || 0) + v; });
+    const sups = SUPPORTS.map(x => x.s).filter(s => (before[s] || 0) || (after[s] || 0));
+    rows = sups.map(s => {
+      const b = before[s] || 0, a = after[s] || 0, mv = a - b;
+      return `<tr><td>${esc(s)}</td><td>${b ? eur(b) : '—'}</td><td class="mv ${mv < 0 ? 'neg' : mv > 0 ? 'pos' : ''}">${mv ? (mv > 0 ? '+' : '−') + eur(Math.abs(mv)) : '—'}</td><td>${a ? eur(a) + ` <span class="muted">(${pct(a / total)})</span>` : '—'}</td></tr>`;
+    }).join('') + `<tr class="tot"><td>Total</td><td>${eur(total)}</td><td>—</td><td>${eur(total)}</td></tr>`;
+  } else {
+    rows = `<tr><td>Fonds euros</td><td>${eur(before['Fonds euros'])}</td><td class="mv neg">−${eur(act.amount)}</td><td>${eur(before['Fonds euros'] - act.amount)}</td></tr><tr><td colspan="4" style="text-align:left;color:var(--warn-ink);font-weight:700;white-space:normal">Supports cibles : en attente de la réponse de la cliente.</td></tr>`;
+  }
+  const bar = h => `<div class="alloc">${SUPPORTS.filter(x => (h[x.s] || 0) > 0).map(x => `<i style="width:${(100 * h[x.s] / total).toFixed(2)}%;background:${x.color}"></i>`).join('')}</div>`;
+  const legend = `<div class="alloc-leg">${SUPPORTS.filter(x => before[x.s] || (act && act.to && after[x.s])).map(x => `<span><i style="background:${x.color}"></i>${esc(x.s)}</span>`).join('')}</div>`;
+  return `${readings}<div class="act-meta">Contrat ${sc.contract} · date de valeur <b>${VALUE_DATE}</b> (J+2 jours ouvrés) · frais <b>0 €</b> (1er arbitrage de l’année)</div>
+    <table class="act-t"><thead><tr><th>Support</th><th>Avant</th><th>Mouvement</th><th>Après</th></tr></thead><tbody>${rows}</tbody></table>
+    <div class="alloc-row"><span>Avant</span>${bar(before)}</div>${act && act.to ? `<div class="alloc-row"><span>Après</span>${bar(after)}</div>` : ''}${legend}`;
+}
+function renderDecision() {
+  const sc = SC[S.sc], R = S.R;
+  const hasKo = R.ctrls.some(c => c.st === 'ko');
+  const needReading = S.sc === 'B' && !(R.act && R.act.to);   /* ordre incomplet : répartition à faire préciser */
+  let q;
+  if (!sc.prepared) q = 'Arbitrage impossible en l’état : 2 points bloquants, l’acte n’est pas préparé. Que décidez-vous ?';
+  else if (needReading) q = `Ordre incomplet : ${eur(R.act.amount)} vers des supports actions, sans répartition. Demandez une précision : message pré-rédigé.`;
+  else if (hasKo) q = 'Un contrôle est rouge : corrigez l’acte, renvoyez au client ou escaladez.';
+  else q = `Confirmez-vous l’arbitrage de ${eur(R.act.amount)} du fonds euros vers ${targetsText(R.act.to)} ?`;
+  const done = !!R.decision, dis = c => (done || c) ? 'disabled' : '';
+  const vTitle = !sc.prepared ? 'Désactivé : 2 contrôles bloquants' : needReading ? 'Désactivé : ordre incomplet, répartition à faire préciser par la cliente' : hasKo ? 'Désactivé : un contrôle est rouge' : 'Valider l’arbitrage';
+  $('#R-decision').innerHTML = `<div class="f-q">
+      <h4><span class="num">3</span>Votre décision <span class="guard">${ic('shield')}L’Agent IA prépare, le Conseiller CRC décide.</span></h4>
+      <p id="R-question">${esc(q)}</p>
+      <div class="dbtns">
+        <button class="dbtn v" id="R-d-valider" data-r="decide" data-d="valider" ${dis(!sc.prepared || needReading || hasKo)} title="${esc(vTitle)}">${ic('check')}Valider</button>
+        <button class="dbtn" id="R-d-corriger" data-r="decide" data-d="corriger" ${dis(!sc.prepared || needReading)} title="${!sc.prepared ? 'Aucun acte préparé' : needReading ? 'La répartition doit être choisie par la cliente' : 'Modifier l’acte pré-rempli'}">${ic('edit')}Corriger</button>
+        <button class="dbtn ${needReading && !done ? 'reco' : ''}" id="R-d-renvoyer" data-r="decide" data-d="renvoyer" ${dis(false)}>${ic('reply')}${needReading ? 'Demander une précision' : 'Renvoyer au client'}</button>
+        <button class="dbtn ${!sc.prepared && !done ? 'reco' : ''}" id="R-d-escalader" data-r="decide" data-d="escalader" ${dis(false)}>${ic('up')}Escalader</button>
+      </div>
+      ${done ? resultHTML() : ''}
+    </div>
+    <div class="journal"><h5>${ic('log')}Journal de traçabilité</h5><ul class="jl" id="R-jl"></ul></div>`;
+  renderJournal();
+}
+function resultHTML() {
+  const sc = SC[S.sc], d = S.R.decision;
+  if (d === 'valider') return `<div class="result ok">${ic('check')}Validé par vous · acte transmis en gestion · confirmation envoyée à la cliente.</div>`;
+  if (d === 'renvoyer') return `<div class="result info">${ic('reply')}${S.sc === 'B' ? `Demande de précision envoyée à ${esc(sc.sender)} · en attente de sa réponse · acte pré-rempli conservé.` : `Message envoyé à ${esc(sc.sender)} · demande en attente de sa réponse.`}</div>`;
+  return `<div class="result info">${ic('up')}${S.sc === 'C' ? 'Escaladé au service Juridique & Nantissements · réponse d’attente envoyée à la demandeuse.' : 'Escaladé au superviseur CRC, avec la fiche de décision.'}</div>`;
+}
+function journal(who, text) { S.R.journal.push({ t: fmtHM(new Date()), who, text, fresh: true }); renderJournal(); }
+function renderJournal() {
+  const ul = $('#R-jl'); if (!ul) return;
+  ul.innerHTML = S.R.journal.map(j => `<li class="${j.fresh ? 'new' : ''}"><span class="t">${j.t}</span><span class="who ${j.who}">${j.who === 'ai' ? 'Agent IA' : 'Conseiller CRC'}</span><span>${esc(j.text)}</span></li>`).join('');
+  S.R.journal.forEach(j => { j.fresh = false; });
+  ul.scrollTop = ul.scrollHeight;
+}
+function keysOf(el) { return (el.dataset.k || '').split(' ').filter(Boolean); }
+function flashKeys(keys, origin) {
+  const root = $('#R-win-fiche'); if (!root) return;
+  const els = new Set();
+  keys.forEach(k => $$(`[data-k~="${k}"]`, root).forEach(e => { if (!e.classList.contains('ctl')) els.add(e); }));
+  if (origin) els.add(origin);
+  els.forEach(e => { e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); });
+  const first = [...els].find(e => e !== origin && (e.tagName === 'MARK' || e.classList.contains('scan-row') || e.closest('#R-card')));
+  if (first) ensureVisible(first.closest('.f-pj') || first).catch(() => {});
+}
+function closePanel() { const p = $('#R-panel'); if (p) p.remove(); }
+function mailBlock(m) { return `<div class="mail"><span class="tagai">${ic('spark')} pré-rédigé</span><div class="mh"><span class="k">À</span><span>${esc(m.to)}</span><span class="k">Objet</span><span>${esc(m.subject)}</span></div><div class="mb">${esc(m.body)}</div></div>`; }
+function openPanel(kind) {
+  closePanel();
+  const sc = SC[S.sc], p = document.createElement('div'); p.className = 'f-panel'; p.id = 'R-panel'; p.dataset.kind = kind;
+  if (kind === 'corriger') {
+    const act = S.R.act, opts = SUPPORTS.filter(x => x.s !== 'Fonds euros');
+    const rows = [0, 1].map(i => { const t = act.to[i] || ['', 0]; return `<tr><td style="width:58%"><select data-ci="${i}"><option value="">— aucun —</option>${opts.map(o => `<option ${o.s === t[0] ? 'selected' : ''}>${esc(o.s)}</option>`).join('')}</select></td><td><input type="number" min="0" step="500" data-ca="${i}" value="${t[1] || ''}"></td></tr>`; }).join('');
+    p.innerHTML = `<h4>${ic('edit')}Corriger l’acte préparé</h4><p>Modifiez les supports ou les montants : l’Agent IA recalcule aussitôt les contrôles. Chaque champ modifié compte comme une ressaisie.</p>
+      <table class="corr-t"><thead><tr><th style="text-align:left;font-size:11px;color:var(--muted)">Support investi</th><th style="text-align:left;font-size:11px;color:var(--muted)">Montant (€)</th></tr></thead><tbody>${rows}</tbody></table>
+      <div style="font-size:12px;margin-bottom:10px">Total désinvesti du fonds euros : <b id="R-corr-total">${eur(act.amount)}</b></div>
+      <div class="dbtns"><button class="dbtn v" id="R-corr-apply" data-r="corrApply">${ic('check')}Appliquer la correction</button><button class="dbtn" id="R-panel-cancel" data-r="panelCancel">${ic('x')}Annuler</button></div>`;
+  } else {
+    const m = sc.mails[kind];
+    p.innerHTML = `<h4>${ic(kind === 'renvoyer' ? 'reply' : 'up')}${esc(m.title)} · message pré-rédigé par l’Agent IA</h4><p>Rédigé à partir de la fiche de décision. Vous le relisez : rien n’est envoyé sans votre clic.</p>
+      ${mailBlock(m)}${m.extra ? mailBlock(m.extra) : ''}
+      <div class="dbtns"><button class="dbtn v" id="R-panel-send" data-r="panelSend">${ic('send')}${esc(m.send)}</button><button class="dbtn" id="R-panel-cancel" data-r="panelCancel">${ic('x')}Annuler</button></div>`;
+  }
+  $('#R-fmain').appendChild(p);
+}
+function finalize(kind) {
+  const sc = SC[S.sc];
+  S.R.decision = kind; closePanel();
+  renderDecision();
+  if (kind === 'valider') {
+    journal('hu', `Arbitrage validé : ${eur(S.R.act.amount)} du fonds euros vers ${targetsText(S.R.act.to)}`);
+    journal('ai', `Acte transmis en gestion · n° ARB-${YEAR}-004513`);
+    journal('ai', 'Confirmation envoyée à la cliente (message pré-rédigé)');
+  } else if (kind === 'renvoyer') {
+    journal('hu', (S.sc === 'B' ? 'Demande de précision envoyée à ' : 'Message envoyé à ') + sc.sender + ' (pré-rédigé, relu)');
+    journal('ai', S.sc === 'B' ? 'Demande en attente · acte conservé, finalisé dès la réponse de la cliente' : 'Demande mise en attente du retour client');
+  } else {
+    journal('hu', S.sc === 'C' ? 'Escalade envoyée au service Juridique & Nantissements' : 'Escalade envoyée au superviseur CRC');
+    if (S.sc === 'C') journal('ai', 'Réponse d’attente envoyée à la demandeuse (pré-rédigée)');
+  }
+  stage('R', 'trace');
+  const st = $('#R-st-target');
+  if (st) st.innerHTML = kind === 'valider' ? '<span class="st done">Traitée · validée</span>' : kind === 'renvoyer' ? '<span class="st wait">En attente client</span>' : '<span class="st wait">Escaladée</span>';
+  S.R.done = true;
+}
+
+/* ---------- Actions de la console cible (droite) ---------- */
+const HR = {
+  async row() { toast('R', 'Pour la démonstration, ouvrez la demande d’arbitrage.'); },
+  async openReq(el) {
+    if (S.R.ficheOpen) { front('R', 'fiche'); return; }
+    openFiche(); toolOpened('R', 'fiche');
+    el.classList.add('opened'); el.classList.remove('pulse');
+    stage('R', 'open');
+    setM('R', 'controls', 7);
+    if (S.sc === 'B') addAnoms('R', [{ kind: 'warn', label: 'Ambiguïté' }], 'ouverture', 'open', 'ambiguïté · étape 1');
+    if (S.sc === 'C') addAnoms('R', [{ kind: 'ko', label: 'Demandeuse sans pouvoir' }, { kind: 'ko', label: 'Contrat nanti' }], 'ouverture', 'open', 'blocage · étape 1');
+    journal('hu', 'Fiche de décision ouverte');
+  },
+  async src(el) { stage('R', 'verify'); flashKeys(keysOf(el), el); },
+  async task(el) { front('R', el.dataset.w); },
+  async decide(el) {
+    if (el.disabled || S.R.decision) return;
+    stage('R', 'verify'); stage('R', 'decide');
+    const d = el.dataset.d;
+    if (d === 'valider') { finalize('valider'); return; }
+    openPanel(d);
+    journal('hu', { corriger: 'Correction de l’acte demandée', renvoyer: S.sc === 'B' ? 'Demande de précision : message pré-rédigé ouvert' : 'Renvoi au client : message pré-rédigé ouvert', escalader: 'Escalade : message pré-rédigé ouvert' }[d]);
+  },
+  async panelSend() { const p = $('#R-panel'); if (p) finalize(p.dataset.kind); },
+  async panelCancel() { closePanel(); journal('hu', 'Action annulée'); },
+  async corrApply() {
+    const old = S.R.act.to, to = []; let changed = 0;
+    [0, 1].forEach(i => {
+      const s = $(`#R-panel [data-ci="${i}"]`).value, v = Math.max(0, Math.round(+$(`#R-panel [data-ca="${i}"]`).value || 0)), o = old[i] || ['', 0];
+      if (s !== o[0]) changed++; if (v !== (o[1] || 0)) changed++;
+      if (s && v) to.push([s, v]);
+    });
+    if (!to.length) { toast('R', 'Indiquez au moins un support et un montant.'); return; }
+    const amount = to.reduce((a, t) => a + t[1], 0);
+    S.R.act = { amount, to };
+    S.R.ctrls = evalControls(SC[S.sc], S.R.act);
+    if (changed) inc('R', 'rekeys', changed);
+    closePanel(); renderPrep(); renderDecision();
+    journal('hu', `Acte corrigé : ${eur(amount)} vers ${targetsText(to)}`);
+    journal('ai', 'Contrôles recalculés : ' + stTxt(countSt(S.R.ctrls)));
+  },
+};
+
+/* ---------- Distribution des clics ---------- */
+async function handleL(el, guided = false) {
+  const h = HL[el.dataset.l]; if (!h || el.disabled) return;
+  S.lock.L = true;
+  try { inc('L', 'clicks'); await h(el); }
+  catch (e) { if (!(e instanceof Abort)) console.error(e); else if (guided) throw e; }
+  finally { S.lock.L = false; }
+  if (!guided && S.mode === 'free') { freeHintL(); checkEndFree(); }
+}
+async function handleR(el, guided = false) {
+  const h = HR[el.dataset.r]; if (!h || el.disabled) return;
+  S.lock.R = true;
+  try { inc('R', 'clicks'); await h(el); }
+  catch (e) { if (!(e instanceof Abort)) console.error(e); else if (guided) throw e; }
+  finally { S.lock.R = false; }
+  if (!guided && S.mode === 'free') { freeHintR(); checkEndFree(); }
+}
+async function gClick(side, target) {
+  const el = typeof target === 'string' ? $(target) : target;
+  if (!el) { console.warn('Cible introuvable :', target); return; }
+  await ensureVisible(el);
+  await moveCursor(side, el);
+  ripple(side);
+  await sleep(150);
+  if (side === 'L') await handleL(el, true); else await handleR(el, true);
+}
+
+/* ---------- Préparation par l’Agent IA (en amont) ---------- */
+async function aiPrep() {
+  const sc = SC[S.sc], list = $('#R-prep-list'), st = $('#R-st-target');
+  const short = ['lecture du message', 'analyse de la pièce jointe', 'consultation du contrat', 'vérification des supports', '7 contrôles', !sc.prepared ? 'points bloquants' : S.sc === 'B' ? 'rédaction de la demande de précision' : 'pré-remplissage de l’acte'];
+  const apps = [null, null, 'contrat', 'cata', 'chk', 'saisie'];
+  for (let i = 0; i < 6; i++) {
+    const li = list.children[i]; li.classList.add('run');
+    st.innerHTML = `<span class="st prep"><span class="spin"></span>Agent IA · ${esc(short[i])}</span>`;
+    await sleep(520);
+    li.classList.remove('run');
+    if (i === 5 && !sc.prepared) { li.classList.add('ko'); li.querySelector('.pk').innerHTML = ic('x'); } else li.classList.add('ok');
+    if (apps[i] && (sc.prepared || apps[i] !== 'saisie')) $('#R-app-' + apps[i]).classList.add('ok');
+  }
+  const ctrls = evalControls(sc, sc.req), t = fmtHM(new Date());
+  S.R.journal.push({ t, who: 'ai', text: 'Message sécurisé lu, pièce jointe analysée' });
+  S.R.journal.push({ t, who: 'ai', text: `Contrat ${sc.contract} et catalogue des supports consultés` });
+  S.R.journal.push({ t, who: 'ai', text: '7 contrôles exécutés : ' + stTxt(countSt(ctrls)) });
+  S.R.journal.push({ t, who: 'ai', text: !sc.prepared ? 'Acte non préparé : 2 points bloquants · décision attendue' : S.sc === 'B' ? 'Ordre incomplet : montant pré-rempli, demande de précision pré-rédigée · décision attendue' : 'Acte pré-rempli · décision attendue' });
+  st.innerHTML = `<span class="st ai">${ic('spark')}Préparée par l’Agent IA</span>`;
+  S.R.prepDone = true;
+  stage('R', 'prep');
+}
+async function beat0() {
+  $$('.ib-row.target').forEach(r => r.classList.add('pulse'));
+  S.R.cur = 'prep'; renderFrise('R');
+  if (S.mode === 'guided') {
+    S.L.cur = 'msg'; renderFrise('L');
+    cap('L', 'Départ', 'La demande d’arbitrage arrive dans la corbeille : <b>rien n’est préparé</b>. Le Conseiller CRC va la traiter avec ses outils habituels.');
+  } else {
+    cap('L', 'À vous', 'Ouvrez la <b>demande d’arbitrage</b> dans la corbeille (ligne surlignée), puis traitez-la avec les applications.');
+  }
+  cap('R', 'Départ', 'Même demande, même corbeille. <b>Dès réception</b>, l’Agent IA la prépare : lecture, vérifications, contrôles, acte pré-rempli.');
+  await aiPrep();
+  S.R.cur = 'open'; renderFrise('R');
+  if (S.mode === 'guided') cap('R', 'Prête', 'La demande porte la mention <b>« Préparée par l’Agent IA »</b>. Le Conseiller CRC n’a encore rien fait.');
+}
+
+/* ---------- Démo guidée : les deux consoles avancent étape par étape ---------- */
+function aBeats() {
+  return [
+    { L: { node: 'msg', step: 'Étape 1 · Message', text: 'Le Conseiller CRC ouvre le <b>message sécurisé</b> : il lit le texte et repère la pièce jointe.' },
+      R: { node: 'open', step: 'Étape 1 · Ouvrir la fiche', text: 'La demande s’ouvre sur une <b>seule fiche de décision, déjà prête</b> : demande, préparation de l’Agent IA, décision.' },
+      runL: async () => { await gClick('L', '#L-row-target'); await sleep(250); },
+      runR: async () => { await gClick('R', '#R-row-target'); await sleep(300); note('R', '#R-fstatus', 'Tout est déjà là : demande, 7 contrôles, acte pré-rempli.', 'ai'); } },
+    { L: { node: 'pj', step: 'Étape 2 · Pièce jointe', text: 'Deuxième fenêtre : le formulaire scanné est <b>en partie manuscrit</b>, le Conseiller CRC zoome pour le déchiffrer.' },
+      R: { node: 'verify', step: 'Étape 2 · Vérifier', text: 'Les éléments extraits du message et du formulaire sont <b>surlignés</b> ; un clic sur un champ montre <b>sa source</b>.' },
+      runL: async () => { await gClick('L', '#L-pj-link'); await sleep(200); await gClick('L', '#L-zoom-in'); await gClick('L', '#L-zoom-in'); await sleep(200); note('L', '#L-win-pj .viewer-bar', 'Manuscrit : « le reste » sur Obligations Euro. Il faudra calculer le montant.', '', 'below'); },
+      runR: async () => { await spot('#R-sec-demande', ''); await sleep(500); await gClick('R', '#R-chips [data-k="k4"]'); } },
+    { L: { node: 'contrat', step: 'Étape 3 · Contrat', text: 'Troisième outil : le Conseiller CRC <b>ressaisit le n° de contrat</b> pour lire le titulaire, le solde du fonds euros et les supports.' },
+      R: { node: 'verify', step: 'Étape 2 · Vérifier', text: 'Pas d’outil à ouvrir : la <b>carte contrat</b> résume titulaire, solde, procuration et blocages.' },
+      runL: async () => { await gClick('L', '#L-app-contrat'); await gClick('L', '#L-ct-field'); await gClick('L', '#L-ct-search'); await sleep(250); note('L', '#L-ct-holder', 'Solde, répartition, statut des supports : à retenir pour la suite.', '', 'right'); },
+      runR: async () => { await spot('#R-card', 'Équivalent de l’outil Contrat · 0 outil ouvert'); } },
+    { L: { node: 'cata', step: 'Étape 4 · Catalogue', text: 'Quatrième outil : le Conseiller CRC vérifie que les supports sont <b>ouverts</b>, le <b>minimum de 1 000 €</b> et le <b>document d’information</b>.' },
+      R: { node: 'verify', step: 'Étape 2 · Vérifier', text: 'Les conditions du catalogue sont <b>déjà contrôlées</b> : supports ouverts, minimum, document d’information.' },
+      runL: async () => { await gClick('L', '#L-app-cata'); await gClick('L', '#L-cat-1'); await gClick('L', '#L-cat-3'); },
+      runR: async () => { await spot('#R-controls', 'Équivalent du catalogue · conditions vérifiées'); ['supports', 'minimum', 'dic'].forEach(c => { const e = $(`#R-controls [data-c="${c}"]`); if (e) e.classList.add('flash'); }); } },
+    { L: { node: 'saisie', step: 'Étape 5 · Saisie de l’acte', text: 'Formulaire vide : <b>9 champs ressaisis</b> un par un, avec des allers-retours entre fenêtres et du calcul de tête.' },
+      R: { node: 'verify', step: 'Étape 2 · Vérifier', text: 'L’acte est <b>pré-rempli</b>, avec la répartition avant / après. Aucune ressaisie.' },
+      runL: async () => {
+        await gClick('L', '#L-app-saisie');
+        await gClick('L', '#L-f-contrat');
+        await gClick('L', '#L-task-msg'); await sleep(250); await gClick('L', '#L-task-saisie');
+        await gClick('L', '#L-f-dSup');
+       
+        await gClick('L', '#L-f-dMnt');
+        await gClick('L', '#L-f-i1Sup');
+        await gClick('L', '#L-f-i1Mnt');
+        await gClick('L', '#L-f-i2Sup');
+        note('L', '#L-f-i2Mnt', 'Calcul de tête : « le reste » = 15 000 − 10 000 = 5 000 €', '', 'above');
+        await gClick('L', '#L-f-i2Mnt');
+        clearNotes();
+        await gClick('L', '#L-task-cata'); note('L', '#L-win-cata .cat-rules', 'Règle à retrouver : date de valeur J+2 jours ouvrés.', '', 'below'); await sleep(450);
+        await gClick('L', '#L-task-saisie'); clearNotes();
+        await gClick('L', '#L-f-date');
+        await gClick('L', '#L-f-frais');
+      },
+      runR: async () => {
+        await spot('#R-act', 'Équivalent de la saisie · 0 ressaisie');
+      } },
+    { L: { node: 'chk', step: 'Étape 6 · Check-list', text: 'Sixième fenêtre : <b>7 contrôles cochés de mémoire</b>, sans vérification automatique de ce qui a été vu.' },
+      R: { node: 'verify', step: 'Étape 2 · Vérifier', text: 'Les <b>7 contrôles</b> sont exécutés automatiquement, chacun avec son feu et sa raison.' },
+      runL: async () => {
+        await gClick('L', '#L-app-chk');
+        for (const id of ['solde', 'supports', 'minimum']) await gClick('L', '#L-chk-' + id);
+        await gClick('L', '#L-task-contrat'); note('L', '#L-ct-nanti', 'Un blocage ? Le Conseiller CRC retourne vérifier dans l’outil Contrat.', '', 'right'); await sleep(500);
+        await gClick('L', '#L-task-chk'); clearNotes();
+        for (const id of ['blocage', 'demandeur', 'signature', 'dic']) await gClick('L', '#L-chk-' + id);
+      },
+      runR: async () => { await spot('#R-controls', 'Équivalent de la check-list · 7 contrôles automatiques'); } },
+    { L: { node: 'decision', step: 'Étape 7 · Valider et répondre', text: 'Le Conseiller CRC enregistre l’acte, <b>rédige lui-même la confirmation</b> à la cliente, puis clôture la demande.' },
+      R: { node: 'decide', step: 'Étape 3 · Décider', text: 'Le Conseiller CRC <b>valide</b> : l’Agent IA ne valide jamais seul. Décision et confirmation sont <b>tracées dans le journal</b>.' },
+      runL: async () => {
+        await gClick('L', '#L-task-saisie'); await gClick('L', '#L-saisie-save'); await sleep(250); await gClick('L', '#L-dlg-ok');
+        await gClick('L', '#L-task-msg'); await gClick('L', '#L-btn-reply'); await gClick('L', '#L-reply-body'); await gClick('L', '#L-reply-send'); await gClick('L', '#L-btn-close');
+      },
+      runR: async () => { await spot('#R-decision', 'La décision reste au Conseiller CRC'); await sleep(800); await gClick('R', '#R-d-valider'); await sleep(250); await spot('#R-decision', 'Décision tracée dans le journal'); } },
+  ];
+}
+function cBeats() {
+  return [
+    { L: { node: 'msg', step: 'Étape 1 · Message', text: 'Le Conseiller CRC ouvre le message : la demande vient de la <b>fille du titulaire</b>. Aucun signal de blocage à ce stade.' },
+      R: { node: 'open', step: 'Étape 1 · Ouvrir la fiche', text: 'Dès l’ouverture, <b>2 contrôles rouges</b> : demandeuse sans pouvoir et contrat nanti. L’acte n’est pas préparé, <b>Valider est désactivé</b>.' },
+      runL: async () => { await gClick('L', '#L-row-target'); await sleep(250); note('L', '#L-msg-text', 'Peut-elle agir pour son père ? Rien ne le dit ici : il faudra chercher.'); },
+      runR: async () => { await gClick('R', '#R-row-target'); await sleep(350); await spot('#R-controls', 'Blocages détectés dès l’ouverture'); } },
+    { L: { node: 'pj', step: 'Étape 2 · Pièce jointe', text: 'Le Conseiller CRC déchiffre le formulaire manuscrit, signé <b>« S. Durand, pour mon père »</b>.' },
+      R: { node: 'verify', step: 'Étape 2 · Vérifier', text: 'Un clic sur un contrôle rouge montre <b>sa source</b> : nantissement et absence de procuration dans la carte contrat.' },
+      runL: async () => { await gClick('L', '#L-pj-link'); await sleep(200); await gClick('L', '#L-zoom-in'); await gClick('L', '#L-zoom-in'); await sleep(200); note('L', '#L-win-pj .viewer-bar', 'Signé par la fille « pour mon père ». Est-ce valable ? Pas d’indice ici.', '', 'below'); },
+      runR: async () => { await gClick('R', '#R-controls [data-c="blocage"]'); await sleep(1100); await gClick('R', '#R-controls [data-c="demandeur"]'); } },
+    { L: { node: 'contrat', step: 'Étape 3 · Contrat', text: 'C’est seulement <b>en ouvrant l’outil Contrat</b> que le Conseiller CRC découvre le nantissement et l’absence de pouvoir de la demandeuse.' },
+      R: { node: 'verify', step: 'Étape 2 · Vérifier', text: 'Ici, le blocage était visible <b>dès l’étape 1</b>, sans ouvrir aucun autre outil.' },
+      runL: async () => {
+        await gClick('L', '#L-app-contrat'); await gClick('L', '#L-ct-field'); await gClick('L', '#L-ct-search'); await sleep(300);
+        ring('L', '#L-ct-nanti'); ring('L', '#L-ct-proc');
+        note('L', '#L-ct-nanti', `Découvert à l’étape ${S.L.anomStep || 3} seulement : contrat nanti, demandeuse sans pouvoir. Le travail déjà fait ne sert plus.`, 'alert', 'below');
+      },
+      runR: async () => { await spot('#R-card', 'Nantissement visible dès l’étape 1'); } },
+    { L: { node: 'decision', step: 'Étape 4 · Escalader et répondre', text: 'Le Conseiller CRC <b>rédige lui-même l’escalade</b> en ressaisissant le contexte, puis répond à la demandeuse et clôture.' },
+      R: { node: 'decide', step: 'Étape 3 · Décider', text: 'Le Conseiller CRC <b>escalade</b> : le message type est pré-rempli avec les 2 motifs. Il le relit, puis l’envoie.' },
+      runL: async () => {
+        await gClick('L', '#L-task-msg'); await gClick('L', '#L-btn-transfer'); await gClick('L', '#L-tr-dest'); await gClick('L', '#L-tr-note'); await gClick('L', '#L-tr-send');
+        await gClick('L', '#L-btn-reply'); await gClick('L', '#L-reply-body'); await gClick('L', '#L-reply-send'); await gClick('L', '#L-btn-close');
+      },
+      runR: async () => { await spot('#R-decision', 'Valider désactivé · escalade recommandée'); await sleep(700); await gClick('R', '#R-d-escalader'); await sleep(1300); await gClick('R', '#R-panel-send'); await sleep(250); await spot('#R-decision', 'Décision tracée dans le journal'); } },
+  ];
+}
+function bBeats() {
+  return [
+    { L: { node: 'msg', step: 'Étape 1 · Message', text: 'Le Conseiller CRC ouvre le message : <b>« la moitié »</b> de quel montant ? <b>« Vos supports actions »</b> : lesquels, dans quelle répartition ? L’ordre n’est pas exécutable.' },
+      R: { node: 'open', step: 'Étape 1 · Ouvrir la fiche', text: 'La fiche s’ouvre <b>déjà prête</b> : ordre incomplet signalé, montant calculé, <b>demande de précision pré-rédigée</b>.' },
+      runL: async () => { await gClick('L', '#L-row-target'); await sleep(250); note('L', '#L-msg-text', 'Impossible d’exécuter en l’état. Pour poser une question précise, il faut d’abord retrouver le solde et les supports ouverts.'); },
+      runR: async () => { await gClick('R', '#R-row-target'); await sleep(300); note('R', '#R-fstatus', 'Ordre incomplet détecté dès l’ouverture : Valider est désactivé.', 'ai'); } },
+    { L: { node: 'pj', step: 'Étape 2 · Pièce jointe', text: 'Le Conseiller CRC déchiffre le formulaire manuscrit, au cas où il préciserait la répartition : <b>ce n’est pas le cas</b>.' },
+      R: { node: 'verify', step: 'Étape 2 · Vérifier', text: 'Les éléments extraits sont <b>surlignés</b> : un clic montre leur source. « La moitié » est déjà convertie en <b>24 000 €</b>.' },
+      runL: async () => { await gClick('L', '#L-pj-link'); await sleep(200); await gClick('L', '#L-zoom-in'); await gClick('L', '#L-zoom-in'); await sleep(200); note('L', '#L-win-pj .viewer-bar', 'Manuscrit : « la moitié », « supports actions ». Aucun montant, aucune répartition.', '', 'below'); },
+      runR: async () => { await spot('#R-sec-demande', ''); await sleep(500); await gClick('R', '#R-chips [data-k="k2"]'); } },
+    { L: { node: 'contrat', step: 'Étape 3 · Contrat', text: 'Le Conseiller CRC <b>ressaisit le n° de contrat</b> pour retrouver le solde du fonds euros et calculer « la moitié ».' },
+      R: { node: 'verify', step: 'Étape 2 · Vérifier', text: 'Pas d’outil à ouvrir : la <b>carte contrat</b> donne le solde du fonds euros et confirme l’absence de blocage.' },
+      runL: async () => { await gClick('L', '#L-app-contrat'); await gClick('L', '#L-ct-field'); await gClick('L', '#L-ct-search'); await sleep(250); note('L', '#L-ct-holder', 'Solde du fonds euros : 48 000 €. « La moitié » = 24 000 €, calculé de tête.', '', 'right'); },
+      runR: async () => { await spot('#R-card', 'Équivalent de l’outil Contrat · 0 outil ouvert'); } },
+    { L: { node: 'cata', step: 'Étape 4 · Catalogue', text: 'Le Conseiller CRC cherche quels <b>supports actions</b> sont ouverts, pour les proposer à la cliente.' },
+      R: { node: 'verify', step: 'Étape 2 · Vérifier', text: 'Les <b>options possibles</b> sont déjà listées, sans être choisies à la place de la cliente : la décision lui revient.' },
+      runL: async () => { await gClick('L', '#L-app-cata'); await gClick('L', '#L-cat-1'); await gClick('L', '#L-cat-2'); await sleep(200); note('L', '#L-win-cata .cat-rules', 'Actions Monde et Actions Europe sont ouverts : à recopier dans la réponse.', '', 'below'); },
+      runR: async () => { await spot('#R-readings', 'Options listées · choix laissé à la cliente'); const e = $('#R-controls [data-c="supports"]'); if (e) e.classList.add('flash'); } },
+    { L: { node: 'decision', step: 'Étape 5 · Demander une précision', text: 'Le Conseiller CRC <b>rédige lui-même</b> sa demande de précision (montant, supports), l’envoie, puis met la demande en attente.' },
+      R: { node: 'decide', step: 'Étape 3 · Décider', text: 'Le Conseiller CRC relit la <b>demande de précision pré-rédigée</b> et l’envoie en 1 clic. L’acte reste prêt pour la réponse de la cliente.' },
+      runL: async () => {
+        await gClick('L', '#L-task-msg'); await gClick('L', '#L-btn-reply');
+        note('L', '#L-reply-body', 'Montant recalculé, supports recopiés : tout est ressaisi à la main.', '', 'above');
+        await gClick('L', '#L-reply-body'); clearNotes();
+        await gClick('L', '#L-reply-send'); await gClick('L', '#L-btn-close');
+      },
+      runR: async () => { await spot('#R-decision', 'Valider désactivé · ordre incomplet'); await sleep(800); await gClick('R', '#R-d-renvoyer'); await sleep(1400); await gClick('R', '#R-panel-send'); await sleep(250); await spot('#R-decision', 'Demande tracée · acte conservé'); } },
+  ];
+}
+const BEATS = { A: aBeats(), B: bBeats(), C: cBeats() };
+
+async function next() {
+  if (S.phase === 'intro') { start(); return; }
+  if ($('#ov-end').classList.contains('show')) return;
+  if (S.mode !== 'guided' || S.paused || S.phase !== 'run') return;
+  if (S.busy) { S.fast = true; updateButtons(); return; }
+  const beats = BEATS[S.sc];
+  if (S.beat >= beats.length) { showEnd(); return; }
+  const b = beats[S.beat], id = S.runId;
+  S.snaps[S.beat] = takeSnap();
+  S.busy = true; S.fast = false; updateButtons();
+  clearNotes(); clearSpots();
+  S.L.cur = b.L.node; renderFrise('L'); S.R.cur = b.R.node; renderFrise('R');
+  cap('L', b.L.step, b.L.text); cap('R', b.R.step, b.R.text);
+  try { await Promise.all([b.runL(), b.runR()]); }
+  catch (e) { if (e instanceof Abort) return; console.error(e); }
+  if (id !== S.runId) return;
+  S.busy = false; S.fast = false; S.beat++; updateButtons();
+  if (S.beat >= beats.length) setTimeout(() => { if (id === S.runId && !S.endShown && !S.paused) showEnd(); }, 1500);
+}
+
+/* ---------- Retour à l’étape précédente (démo guidée) ---------- */
+function deepClone(v) {
+  if (v instanceof Set) return new Set([...v].map(deepClone));
+  if (Array.isArray(v)) return v.map(deepClone);
+  if (v && typeof v === 'object') { const o = {}; Object.keys(v).forEach(k => { o[k] = deepClone(v[k]); }); return o; }
+  return v;
+}
+function takeSnap() {
+  return {
+    L: deepClone(S.L), R: deepClone(S.R), curPos: deepClone(S.curPos),
+    htmlL: $('#console-L').innerHTML, htmlR: $('#console-R').innerHTML,
+    scroll: $$('#consoles [id]').filter(e => e.scrollTop > 0).map(e => [e.id, e.scrollTop]),
+  };
+}
+function restoreSnap(snap) {
+  S.L = deepClone(snap.L); S.R = deepClone(snap.R); S.curPos = deepClone(snap.curPos);
+  pendingChoice = null; S.lock.L = false; S.lock.R = false;
+  $('#console-L').innerHTML = snap.htmlL; $('#console-R').innerHTML = snap.htmlR;
+  $$('#consoles .toast, #consoles .ripple, #consoles .choice').forEach(e => e.remove());
+  $$('#consoles .flash').forEach(e => e.classList.remove('flash'));
+  snap.scroll.forEach(([id, top]) => { const e = document.getElementById(id); if (e) e.scrollTop = top; });
+  ['L', 'R'].forEach(sd => { const c = $('#cap-' + sd); if (c) { c.classList.remove('attn'); void c.offsetWidth; c.classList.add('attn'); } });
+  renderCounters();
+}
+function canPrev() {
+  if (S.mode !== 'guided' || S.phase !== 'run' || S.paused) return false;
+  if ($('#ov-end').classList.contains('show')) return true;
+  return S.busy ? !!S.snaps[S.beat] : S.beat > 0 && !!S.snaps[S.beat - 1];
+}
+function prev() {
+  if (!canPrev()) return;
+  if ($('#ov-end').classList.contains('show')) { $('#ov-end').classList.remove('show'); S.endShown = false; updateButtons(); return; }
+  const target = S.busy ? S.beat : S.beat - 1;
+  S.runId++;                       // interrompt l’animation et les minuteries en cours
+  S.busy = false; S.fast = false; S.endShown = false;
+  restoreSnap(S.snaps[target]);
+  S.beat = target; S.snaps.length = target + 1;
+  updateButtons();
+}
+
+/* ---------- Mode « À vous de jouer » ---------- */
+function freeHintL() {
+  if (S.mode !== 'free' || S.phase !== 'run') return;
+  const L = S.L; let t;
+  if (L.done) { const w = S.sc === 'B' && !L.saved ? 'Demande en attente client.' : 'Demande clôturée.'; t = S.R.done ? w : w + ' À droite, prenez votre décision pour terminer.'; }
+  else if (S.sc === 'C' && L.anoms.length && !L.trSent) t = `Blocage découvert à l’étape ${L.anomStep} : dans le message, utilisez <b>Transférer</b> pour escalader, puis répondez et clôturez.`;
+  else if (!L.stages.includes('msg')) t = 'Ouvrez la <b>demande d’arbitrage</b> dans la corbeille (ligne surlignée).';
+  else if (S.sc === 'B' && !L.saved && !L.replySent) t = 'Ordre incomplet : retrouvez le solde (<b>Contrat</b>) et les supports ouverts (<b>Catalogue</b>), puis demandez une précision via <b>Répondre</b>.';
+  else if (S.sc === 'B' && !L.saved) t = 'Demande de précision envoyée : cliquez sur <b>Mettre en attente client</b>.';
+  else if (!L.stages.includes('saisie') && !L.trSent) t = 'Ouvrez la pièce jointe et les applications utiles : <b>Contrat</b>, <b>Catalogue</b>, puis <b>Saisie de l’acte</b>.';
+  else if (!L.saved && !L.trSent) t = 'Cliquez sur <b>chaque champ</b> pour le ressaisir, cochez la <b>check-list</b>, puis enregistrez l’acte.';
+  else if (!L.replySent) t = 'Répondez au client depuis le <b>message</b> (Répondre), puis clôturez la demande.';
+  else t = 'Réponse envoyée : cliquez sur <b>Clôturer la demande</b>.';
+  cap('L', 'À vous', t);
+}
+function freeHintR() {
+  if (S.mode !== 'free' || S.phase !== 'run') return;
+  if (S.R.done) { cap('R', 'Terminé', 'Décision prise et tracée. Le Conseiller CRC peut passer à un <b>dossier complexe</b>.'); return; }
+  if (!S.R.ficheOpen) return;
+  const t = S.sc === 'A' ? 'Fiche prête : vérifiez, puis décidez. <b>Valider</b>, Corriger, Renvoyer au client ou Escalader.'
+    : S.sc === 'B' ? '<b>Ordre incomplet</b> : Valider est désactivé. Cliquez sur <b>Demander une précision</b> : le message est pré-rédigé, vous le relisez puis l’envoyez.'
+      : '<b>2 points bloquants</b> : Valider est désactivé. <b>Escaladez</b> (message type prêt) ou renvoyez à la demandeuse.';
+  cap('R', 'À vous', t);
+}
+function checkEndFree() {
+  if (S.mode !== 'free' || S.endShown || S.phase !== 'run') return;
+  const id = S.runId;
+  if (S.L.done && S.R.done) setTimeout(() => { if (id === S.runId && !S.endShown) showEnd(); }, 1000);
+  else if (S.L.done && !S.R.notified) { S.R.notified = true; toast('R', 'À gauche, la demande est traitée : prenez votre décision ici.'); }
+  else if (S.R.done && !S.L.notified) { S.L.notified = true; toast('L', S.sc === 'B' ? 'À droite, la demande de précision est envoyée et tracée. Terminez ici.' : 'À droite, la demande est traitée et tracée. Terminez ici, puis clôturez.'); }
+}
+async function freeRun() {
+  await beat0();
+  cap('R', 'Agent IA', 'Préparation terminée : la console ouvre seule la fiche de décision.');
+  await sleep(800);
+  if (!S.R.ficheOpen) await gClick('R', '#R-row-target');
+  await sleep(300);
+  $('#cur-R').classList.remove('show');
+  S.R.cur = 'decide'; renderFrise('R');
+  freeHintR();
+}
+
+/* ---------- Démarrage, pause, réinitialisation ---------- */
+async function start() {
+  if (S.phase !== 'intro') return;
+  $('#ov-intro').classList.remove('show');
+  S.phase = 'run'; S.busy = S.mode === 'guided'; updateButtons();
+  try {
+    if (S.mode === 'guided') { await beat0(); S.busy = false; S.fast = false; updateButtons(); }
+    else await freeRun();
+  } catch (e) { if (!(e instanceof Abort)) console.error(e); }
+}
+function togglePause() {
+  if (S.phase !== 'run') return;
+  S.paused = !S.paused;
+  $('#ov-pause').classList.toggle('show', S.paused);
+  updateButtons();
+}
+function reset() {
+  S.runId++; S.paused = false; S.phase = 'intro'; pendingChoice = null;
+  resetState();
+  buildConsole('L'); buildConsole('R');
+  cap('L', 'Avant de commencer', 'Corbeille du Conseiller CRC : <b>6 demandes</b>, dont la demande d’arbitrage du scénario.');
+  cap('R', 'Avant de commencer', 'Même corbeille, mêmes <b>6 demandes</b> : l’Agent IA va préparer la demande d’arbitrage.');
+  renderCounters();
+  $('#ov-end').classList.remove('show'); $('#ov-pause').classList.remove('show');
+  renderIntro(); $('#ov-intro').classList.add('show');
+  updateButtons();
+}
+function updateButtons() {
+  $$('[data-action="scenario"]').forEach(b => { const on = b.dataset.v === S.sc; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  document.getElementById('stage').dataset.sc = S.sc;
+  $$('[data-action="mode"]').forEach(b => { const on = b.dataset.v === S.mode; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  const nb = $('#btn-next'), beats = BEATS[S.sc];
+  nb.title = 'Raccourci : flèche droite';
+  if (S.phase === 'intro') { nb.disabled = false; nb.innerHTML = ic('play', 'fill') + 'Démarrer'; }
+  else if (S.mode === 'free') { nb.disabled = true; nb.innerHTML = ic('next') + 'Suivant'; nb.title = 'Mode « À vous de jouer » : pilotez la console de gauche à la souris'; }
+  else if (S.busy) { nb.disabled = S.paused; nb.innerHTML = ic('ff') + 'Accélérer l’étape'; }
+  else if (S.beat < beats.length) { nb.disabled = S.paused; nb.innerHTML = ic('next') + `Suivant · ${S.beat + 1}/${beats.length}`; }
+  else { nb.disabled = S.paused; nb.innerHTML = ic('spark') + 'Voir le bilan'; }
+  const vb = $('#btn-prev');
+  vb.disabled = !canPrev();
+  vb.innerHTML = ic('back') + 'Revenir à l’étape précédente';
+  vb.title = S.mode === 'free' ? 'Disponible en démo guidée' : 'Raccourci : flèche gauche';
+  const pb = $('#btn-pause');
+  pb.disabled = S.phase !== 'run'; pb.classList.toggle('on', S.paused);
+  pb.innerHTML = S.paused ? ic('play', 'fill') + 'Reprendre' : ic('pause') + 'Pause';
+  pb.title = 'Raccourci : P';
+  const rb = $('#btn-reset'); rb.innerHTML = ic('reset') + 'Réinitialiser'; rb.title = 'Raccourci : R';
+}
+
+/* ---------- Écran d’introduction : description du scénario ---------- */
+function renderIntro() {
+  const sc = SC[S.sc];
+  $('#intro-card').dataset.sc = sc.id;
+  $('#intro-card').innerHTML = `
+    <button class="card-x" data-action="closeIntro" title="Fermer" aria-label="Fermer">${ic('x')}</button>
+    <div class="kicker sc-k">Scénario ${sc.id}</div>
+    <h2>${esc(sc.name)}</h2>
+    <p class="sc-desc">${esc(sc.title)}</p>
+    <div class="req">
+      <div class="mh"><span class="chip-chan">${ic('lock')}Message sécurisé – application</span><span>De <b>${esc(sc.sender)}</b> · contrat ${sc.contract}</span></div>
+      <blockquote>« ${msgPlain(sc)} »</blockquote>
+    </div>
+    <div class="how"><p>Lancez le scénario pour constater les <b>gains potentiels permis par l’IA</b>, en comparant une console de Conseiller CRC « classique » et une console augmentée par l’<b>IA agentique</b>.</p>
+      <button class="btn primary" data-action="start">${ic('play', 'fill')}Lancer le scénario</button></div>`;
+}
+
+/* ---------- Bandeaux « Aujourd’hui – sans IA » / « À l’ère de l’IA agentique » (consoles et synthèse) ---------- */
+function bannerHTML(side) {
+  return side === 'L'
+    ? ic('user') + '<span class="cb-title">Aujourd’hui – sans IA</span><span class="cb-sub">' + ic('window') + 'Console du Conseiller CRC</span>'
+    : ic('spark') + '<span class="cb-title">À l’ère de l’IA agentique</span><span class="cb-sub">' + ic('window') + 'Console du Conseiller CRC</span>';
+}
+/* ---------- Fenêtre « Synthèse » : enjeu global et accès direct aux 3 scénarios ---------- */
+const SYNTH = {
+  A: { req: 'Claire Martin arbitre 15 000 € de son fonds euros vers deux supports en unités de compte.',
+    L: 'Le Conseiller CRC ouvre 6 outils, ressaisit chaque champ et coche les contrôles de mémoire.',
+    R: 'Dossier prêt dès réception : 7 contrôles au vert, acte pré-rempli. Il vérifie et valide.' },
+  B: { req: '« La moitié de mon fonds euros » vers « vos supports actions » : ni montant ni supports précis.',
+    L: 'Le Conseiller CRC ouvre 4 outils pour recalculer le montant et lister les supports, puis rédige seul sa demande de précision.',
+    R: 'Ordre incomplet signalé dès l’ouverture, montant calculé, validation bloquée : la demande de précision est pré-rédigée.' },
+  C: { req: 'La fille du titulaire demande un arbitrage, sans procuration, sur un contrat nanti.',
+    L: 'Les blocages ne sont découverts qu’à l’étape 3, en ouvrant l’outil Contrat : le travail fait est perdu.',
+    R: 'Blocages visibles dès l’ouverture, validation impossible, escalade pré-rédigée avec ses 2 motifs.' },
+};
+/* Étapes non parcourues à gauche dans la démo guidée (pour le temps affiché dans la synthèse) */
+const GUIDED_SKIP_L = { A: [], B: ['saisie', 'chk'], C: ['cata', 'saisie', 'chk'] };
+function synthTime(id, side) {
+  const d = DUR[id][side];
+  return Object.keys(d).filter(k => !(side === 'L' && GUIDED_SKIP_L[id].includes(k))).reduce((a, k) => a + d[k], 0);
+}
+function renderSynth() {
+  const modeLbl = S.mode === 'guided' ? 'Démo guidée' : 'À vous de jouer';
+  $('#synth-card').innerHTML = `
+    <button class="card-x" data-action="closeSynth" title="Fermer" aria-label="Fermer">${ic('x')}</button>
+    <div class="kicker">${ic('bulb')}Synthèse du démonstrateur</div>
+    <h2>Comparaison des modes de traitement des demandes d’arbitrage entre aujourd’hui et une console optimisée avec l’IA</h2>
+    <p class="sy-intro">Deux consoles du Conseiller CRC traitent la même demande en parallèle. <b>Aujourd’hui</b>, il enchaîne seul les outils. <b>À l’ère de l’IA agentique</b>, un Agent IA prépare le dossier dès réception.</p>
+    <div class="sy-banners"><div class="c-banner l">${bannerHTML('L')}</div><div class="c-banner r">${bannerHTML('R')}</div></div>
+    <div class="sy-principle"><span>${ic('spark')}L’Agent IA prépare</span><span>${ic('shield')}Le Conseiller CRC décide</span><span>${ic('log')}Chaque action est tracée</span></div>
+    <p class="sy-lead">${ic('layers')}3 scénarios sont simulés pour comparer les manières de traiter les demandes, sans IA et avec les apports de l’IA agentique</p>
+    <div class="sy-grid">${['A', 'B', 'C'].map(id => `
+      <div class="sy-card" data-v="${id}">
+        <div class="sy-h"><span class="sc-l">${id}</span>${esc(SC[id].name)}</div>
+        <p class="sy-req">${esc(SYNTH[id].req)}</p>
+        <div class="sy-row l"><b class="t">Aujourd’hui – sans IA</b>${esc(SYNTH[id].L)}</div>
+        <div class="sy-row r"><b class="t">Valeur de l’IA agentique</b>${esc(SYNTH[id].R)}</div>
+        <div class="sy-time">${ic('target')}Temps estimé : <b>${fmtMin(synthTime(id, 'L'))}</b><span class="muted">→</span><span class="r">${fmtMin(synthTime(id, 'R'))}</span></div>
+        <button class="sy-go" data-action="synthLaunch" data-v="${id}">${ic('play', 'fill')}Découvrir le scénario ${id}</button>
+      </div>`).join('')}
+    </div>
+    <div class="sy-foot">${ic('bulb')}Lancement en mode « ${modeLbl} » · temps : estimations indicatives du parcours de la démo guidée · données fictives.</div>`;
+}
+function synthOpen() { return $('#ov-synth').classList.contains('show'); }
+function openSynth() {
+  if (synthOpen()) return;
+  /* Une démonstration en cours est mise en pause pendant la lecture de la synthèse */
+  S.synthPaused = S.phase === 'run' && !S.paused;
+  if (S.synthPaused) togglePause();
+  renderSynth();
+  $('#ov-synth').classList.add('show');
+}
+function closeSynth() {
+  if (!synthOpen()) return;
+  $('#ov-synth').classList.remove('show');
+  if (S.synthPaused && S.paused) togglePause();
+  S.synthPaused = false;
+}
+function launchFromSynth(id) {
+  S.synthPaused = false;
+  $('#ov-synth').classList.remove('show');
+  S.sc = id; reset();   /* ouvre la fenêtre de début du scénario choisi */
+}
+/* ---------- Panneau de fin : « Ce que l’Agent IA a fait pour vous » ---------- */
+function showEnd() {
+  if (S.phase !== 'run') return;
+  S.endShown = true; clearNotes();
+  const sc = SC[S.sc], L = S.L, R = S.R;
+  const rk = Math.max(0, L.m.rekeys - R.m.rekeys), tl = Math.max(0, L.m.tools - R.m.tools);
+  const names = [...L.toolsSet].map(id => TOOL_NAMES[id]);
+  let anomBig, anomTxt;
+  if (S.sc === 'A') { anomBig = '0'; anomTxt = 'Dossier conforme : les 7 contrôles sont au vert. Le Conseiller CRC décide en confiance, sans rien revérifier.'; }
+  else if (S.sc === 'B') { anomBig = '1'; anomTxt = `Ordre incomplet signalé dès l’ouverture (étape 1) : « la moitié » convertie en ${eur(24000)}, validation bloquée, demande de précision pré-rédigée.`; }
+  else {
+    anomBig = '2';
+    anomTxt = L.anoms.length
+      ? `Blocages visibles dès l’étape 1. À gauche, découverts à l’étape ${L.anomStep}, après ${L.anomSnap.clicks} clics et ${L.anomSnap.tools} outils ouverts.`
+      : 'Blocages visibles dès l’étape 1. À gauche, ils n’ont pas été découverts : l’outil Contrat n’a pas été consulté.';
+  }
+  const forgot = (S.sc !== 'C' && L.saved && L.ticks.size < 7) ? 7 - L.ticks.size : 0;
+  let warn = '';
+  if (S.mode === 'free') {
+    if (S.sc === 'B' && L.saved) warn = 'À gauche, un acte a été enregistré sur une interprétation de la demande, sans confirmation de la cliente : risque d’erreur d’exécution et de réclamation.';
+    else if (S.sc === 'C' && L.saved) warn = 'À gauche, l’acte a été enregistré sur un contrat nanti, pour une demandeuse sans pouvoir : rien ne l’a empêché.';
+    else if (S.sc === 'C' && !L.anoms.length) warn = 'À gauche, les 2 blocages n’ont pas été découverts : aucun outil ne les a signalés.';
+    else if (forgot) warn = `À gauche, ${forgot} contrôle${forgot > 1 ? 's' : ''} de la check-list ${forgot > 1 ? 'n’ont' : 'n’a'} pas été coché${forgot > 1 ? 's' : ''} avant l’enregistrement de l’acte.`;
+  }
+  const dec = { valider: 'il a validé l’arbitrage', renvoyer: S.sc === 'B' ? 'il a demandé une précision à la cliente' : 'il a renvoyé la demande au client', escalader: 'il a escaladé la demande' }[R.decision] || 'la décision attend encore son clic';
+  const notOpened = names.filter(n => n !== 'Message');
+  $('#end-card').dataset.sc = sc.id;
+  $('#end-card').innerHTML = `
+    <button class="card-x" data-action="closeEnd" title="Fermer" aria-label="Fermer">${ic('x')}</button>
+    <div class="kicker sc-k">Scénario ${sc.id} · ${esc(sc.name)}</div>
+    <h2>Ce que l’Agent IA a fait pour vous</h2>
+    <div class="end-kpis">
+      <div class="kpi"><div class="big">${rk}</div><h6>ressaisie${rk > 1 ? 's' : ''} évitée${rk > 1 ? 's' : ''}</h6><p>${S.sc === 'C' && !L.saved ? 'N° de contrat, contexte de l’escalade, réponse à la demandeuse : tout était pré-rédigé.' : S.sc === 'B' && !L.saved ? 'N° de contrat, montant recalculé, supports possibles, demande de précision : tout était pré-rédigé.' : 'N° de contrat, supports, montants, date de valeur, frais, réponse au client : tout était pré-rempli.'}</p></div>
+      <div class="kpi"><div class="big">${tl}</div><h6>outil${tl > 1 ? 's' : ''} non ouvert${tl > 1 ? 's' : ''}</h6><p>${notOpened.length ? esc(joinFr(notOpened)) + ' : ' : ''}${L.m.tools} fenêtre${L.m.tools > 1 ? 's' : ''} à gauche, une seule fiche de décision à droite.</p></div>
+      <div class="kpi"><div class="big">7<small>/ 7</small></div><h6>contrôles faits pour vous</h6><p>Exécutés automatiquement, chacun avec son feu et sa raison. À gauche : ${L.m.controls ? `${L.m.controls} fait${L.m.controls > 1 ? 's' : ''} à la main${L.ticks.size ? ', cochés de mémoire' : L.implicit.size ? ', en lisant l’outil Contrat' : ''}` : 'aucun contrôle formalisé'}.</p></div>
+      <div class="kpi"><div class="big">${anomBig}</div><h6>anomalie${anomBig === '1' || anomBig === '0' ? '' : 's'} détectée${anomBig === '1' || anomBig === '0' ? '' : 's'}</h6><p>${esc(anomTxt)}</p></div>
+    </div>
+    ${warn ? `<div class="warnbox">${ic('alert')} ${esc(warn)}</div>` : ''}
+    <div class="cmp">
+      <div>Étapes<br><b>${L.m.steps}</b><span class="arrow">→</span><span class="r">${R.m.steps}</span></div>
+      <div>Clics<br><b>${L.m.clicks}</b><span class="arrow">→</span><span class="r">${R.m.clicks}</span></div>
+      <div>Outils ouverts<br><b>${L.m.tools}</b><span class="arrow">→</span><span class="r">${R.m.tools}</span></div>
+      <div>Ressaisies<br><b>${L.m.rekeys}</b><span class="arrow">→</span><span class="r">${R.m.rekeys}</span></div>
+      <div class="tm"><span>Temps de traitement estimé<br><b>${fmtMin(L.m.time)}</b><span class="arrow">→</span><span class="r">${fmtMin(R.m.time)}</span><small>Estimation indicative du temps du Conseiller CRC</small></span></div>
+    </div>
+    <div class="gains"><span class="gain">${ic('keyboard')}Moins de ressaisie</span><span class="gain">${ic('window')}Moins d’outils ouverts</span><span class="gain">${ic('checklist')}Moins d’oublis</span><span class="gain">${ic('layers')}Plus de temps pour les dossiers complexes</span></div>
+    <div class="decide-note">${ic('shield')}Le Conseiller CRC a gardé la main : ${esc(dec)}. L’Agent IA prépare, il ne valide jamais seul.</div>
+    <div class="end-btns">
+      <button class="btn" data-action="replay">${ic('reset')}Rejouer ce scénario</button>
+      <button class="btn primary" data-action="nextScenario">${ic('next')}Scénario ${({ A: 'B', B: 'C', C: 'A' })[S.sc]}</button>
+    </div>`;
+  $('#ov-end').classList.add('show');
+  updateButtons();
+}
+
+/* ---------- Événements ---------- */
+function onAction(a, t) {
+  switch (a) {
+    case 'scenario': S.sc = t.dataset.v; reset(); break;
+    case 'mode': S.mode = t.dataset.v; reset(); break;
+    case 'next': next(); break;
+    case 'pause': togglePause(); break;
+    case 'reset': case 'replay': reset(); break;
+    case 'start': start(); break;
+    case 'nextScenario': S.sc = { A: 'B', B: 'C', C: 'A' }[S.sc]; reset(); break;
+    case 'prev': prev(); break;
+    case 'closeEnd': $('#ov-end').classList.remove('show'); updateButtons(); break;
+    case 'closeIntro': $('#ov-intro').classList.remove('show'); break;
+    case 'synth': openSynth(); break;
+    case 'closeSynth': closeSynth(); break;
+    case 'synthLaunch': launchFromSynth(t.dataset.v); break;
+    case 'closeNote': { const n = t.closest('.note'); if (n) n.remove(); break; }
+    case 'closeSpot': { const l = t.closest('.spot-lbl'); if (l) { const host = l.parentElement; l.remove(); if (host) host.classList.remove('spot'); } break; }
+  }
+}
+function userL(t) {
+  if (S.paused || S.phase !== 'run') return;
+  if (S.mode !== 'free') { toast('L', 'Démo guidée : cliquez sur « Suivant » pour avancer.'); return; }
+  if (S.lock.L) return;
+  if (S.L.done) { toast('L', S.sc === 'B' && !S.L.saved ? 'La demande est en attente de la réponse de la cliente.' : 'La demande est clôturée.'); return; }
+  handleL(t);
+}
+function userR(t) {
+  if (S.paused || S.phase !== 'run') return;
+  const a = t.dataset.r;
+  if (S.mode !== 'free') { if (a === 'src') flashKeys(keysOf(t), t); else toast('R', 'Démo guidée : cliquez sur « Suivant » pour avancer.'); return; }
+  if (S.lock.R) return;
+  if (a === 'openReq' && !S.R.prepDone) { toast('R', 'L’Agent IA termine la préparation…'); return; }
+  if (S.R.decision && a !== 'src' && a !== 'task') { toast('R', 'Décision déjà prise et tracée dans le journal.'); return; }
+  handleR(t);
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-action],[data-l],[data-r],[data-choice]');
+  if (!t) return;
+  if (t.hasAttribute('data-choice')) {
+    if (pendingChoice && pendingChoice.side === t.dataset.side && !S.paused) { const i = +t.dataset.choice; if (i >= 0) inc(pendingChoice.side, 'clicks'); pendingChoice.finish(i); }
+    return;
+  }
+  if (t.dataset.action) { onAction(t.dataset.action, t); return; }
+  if (t.dataset.l) { userL(t); return; }
+  if (t.dataset.r) userR(t);
+});
+document.addEventListener('input', e => {
+  if (!e.target.closest || !e.target.closest('#R-panel')) return;
+  let tot = 0;
+  [0, 1].forEach(i => { const s = $(`#R-panel [data-ci="${i}"]`), v = $(`#R-panel [data-ca="${i}"]`); if (s && v && s.value) tot += +v.value || 0; });
+  const el = $('#R-corr-total'); if (el) el.textContent = eur(tot);
+});
+document.addEventListener('keydown', e => {
+  const tg = e.target && e.target.tagName;
+  if (tg === 'INPUT' || tg === 'SELECT' || tg === 'TEXTAREA') return;
+  const k = e.key;
+  if (synthOpen()) { if (k === 'Escape') { e.preventDefault(); closeSynth(); } return; }
+  if ((k === 's' || k === 'S') && !e.ctrlKey && !e.metaKey && !e.altKey) { openSynth(); return; }
+  if (k === 'ArrowRight' || k === 'PageDown') { e.preventDefault(); next(); }
+  else if (k === 'ArrowLeft' || k === 'PageUp') { e.preventDefault(); prev(); }
+  else if (k === 'Enter' && S.phase === 'intro') { e.preventDefault(); start(); }
+  else if (k === ' ') { e.preventDefault(); if (S.phase === 'intro') start(); else if (S.mode === 'guided') next(); }
+  else if (k === 'p' || k === 'P') togglePause();
+  else if (k === 'r' || k === 'R') reset();
+  else if (k === '1' || k === '2' || k === '3') { S.sc = 'ABC'[+k - 1]; reset(); }
+  else if (k === 'Escape') { $('#ov-end').classList.remove('show'); $('#ov-intro').classList.remove('show'); updateButtons(); }
+});
+function fit() {
+  const s = Math.min(window.innerWidth / 1600, window.innerHeight / 900);
+  S.scale = s;
+  $('#stage').style.transform = `translate(-50%, -50%) scale(${s})`;
+}
+function init() {
+  $('#brand-mark').innerHTML = ic('spark');
+  $('#banner-L').innerHTML = bannerHTML('L');
+  $('#banner-R').innerHTML = bannerHTML('R');
+  $('#btn-synth').innerHTML = ic('bulb') + 'Synthèse';
+  $('#pause-pill').innerHTML = ic('pause') + 'Démonstration en pause · cliquez sur « Reprendre » ou appuyez sur P';
+  fit(); window.addEventListener('resize', fit);
+  reset();
+  openSynth();   /* la synthèse s’affiche en premier à l’arrivée sur le démonstrateur */
+}
+init();
+</script>
+</body>
+</html>
